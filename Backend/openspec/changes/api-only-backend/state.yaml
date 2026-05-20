@@ -1,0 +1,10 @@
+schema: spec-driven
+state:
+  exploration: done
+  proposal: pending
+  specs: pending
+  design: pending
+  tasks: pending
+  apply: pending
+  verify: pending
+  archive: pending
