@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 /**
  * @extends Factory<User>
@@ -31,6 +32,38 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            Role::findOrCreate('patient', 'api');
+            $user->assignRole('patient');
+        });
+    }
+
+    public function admin(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            Role::findOrCreate('admin', 'api');
+            $user->syncRoles('admin');
+        });
+    }
+
+    public function doctor(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            Role::findOrCreate('doctor', 'api');
+            $user->syncRoles('doctor');
+        });
+    }
+
+    public function patient(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            Role::findOrCreate('patient', 'api');
+            $user->syncRoles('patient');
+        });
     }
 
     /**

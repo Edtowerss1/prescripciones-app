@@ -24,14 +24,14 @@ The application SHALL provide an endpoint to create personal access tokens for a
 #### Scenario: User creates a token with valid credentials
 
 - GIVEN a user exists in the database
-- WHEN a POST request is sent to `/api/tokens` with valid email and password
+- WHEN a POST request is sent to `/api/auth/login` with valid email and password
 - THEN the response SHALL be 201
 - AND the response body SHALL contain a `token` field with a plain-text bearer token
 
 #### Scenario: Token creation fails with invalid credentials
 
 - GIVEN a user exists in the database
-- WHEN a POST request is sent to `/api/tokens` with an incorrect password
+- WHEN a POST request is sent to `/api/auth/login` with an incorrect password
 - THEN the response status SHALL be 401
 - AND the response SHALL be JSON
 
@@ -65,7 +65,7 @@ The application SHALL support revoking API tokens so they can no longer be used 
 #### Scenario: User revokes their own token
 
 - GIVEN a user has an active Sanctum token
-- WHEN a DELETE request is sent to `/api/tokens/{id}` with a valid bearer token
+- WHEN a DELETE request is sent to `/api/auth/logout` with a valid bearer token
 - THEN the response status SHALL be 204
 - AND subsequent requests with the revoked token SHALL return 401
 
