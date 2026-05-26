@@ -9,28 +9,31 @@ uses(RefreshDatabase::class);
 // Spatie Roles — User
 // --------------------------------------------------------------------
 
-test('spatie roles are assigned via factory', function () {
-    $user = User::factory()->create();
+test('spatie roles are assigned via factory state', function () {
+    $user = User::factory()->patient()->create();
 
     expect($user->hasRole('patient'))->toBeTrue();
+    expect($user->getRoleNames())->toHaveCount(1);
+});
+
+test('factory defaults without a role assignment', function () {
+    $user = User::factory()->create();
+
+    expect($user->getRoleNames())->toHaveCount(0);
 });
 
 test('factory admin state creates user with admin role', function () {
     $user = User::factory()->admin()->create();
 
     expect($user->hasRole('admin'))->toBeTrue();
+    expect($user->getRoleNames())->toHaveCount(1);
 });
 
 test('factory doctor state creates user with doctor role', function () {
     $user = User::factory()->doctor()->create();
 
     expect($user->hasRole('doctor'))->toBeTrue();
-});
-
-test('factory defaults to patient role', function () {
-    $user = User::factory()->create();
-
-    expect($user->getRoleNames()->first())->toBe('patient');
+    expect($user->getRoleNames())->toHaveCount(1);
 });
 
 // --------------------------------------------------------------------
@@ -43,7 +46,9 @@ test('seeder creates a user with admin role', function () {
     $admin = User::where('email', 'admin@test.com')->first();
 
     expect($admin)->not->toBeNull()
-        ->and($admin->hasRole('admin'))->toBeTrue();
+        ->and($admin->hasRole('admin'))->toBeTrue()
+        ->and($admin->hasRole('patient'))->toBeFalse()
+        ->and($admin->getRoleNames())->toHaveCount(1);
 });
 
 test('seeder creates a user with patient role', function () {
@@ -52,7 +57,8 @@ test('seeder creates a user with patient role', function () {
     $patient = User::where('email', 'patient@test.com')->first();
 
     expect($patient)->not->toBeNull()
-        ->and($patient->hasRole('patient'))->toBeTrue();
+        ->and($patient->hasRole('patient'))->toBeTrue()
+        ->and($patient->getRoleNames())->toHaveCount(1);
 });
 
 // --------------------------------------------------------------------

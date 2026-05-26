@@ -21,6 +21,10 @@
         "method": "POST",
         "header": [
           {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
             "key": "Content-Type",
             "value": "application/json"
           }
@@ -44,7 +48,7 @@
               "pm.test('status is 201', () => pm.response.to.have.status(201));",
               "const json = pm.response.json();",
               "pm.test('has access_token', () => pm.expect(json.access_token).to.be.a('string'));",
-              "pm.environment.set('token', json.access_token);"
+              "pm.environment.set('adminToken', json.access_token);"
             ]
           }
         }
@@ -55,6 +59,10 @@
       "request": {
         "method": "POST",
         "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
           {
             "key": "Content-Type",
             "value": "application/json"
@@ -90,6 +98,10 @@
         "method": "GET",
         "header": [
           {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
             "key": "Authorization",
             "value": "Bearer {{token}}"
           }
@@ -107,6 +119,10 @@
         "method": "GET",
         "header": [
           {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
             "key": "Authorization",
             "value": "Bearer {{token}}"
           }
@@ -123,6 +139,10 @@
       "request": {
         "method": "POST",
         "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
           {
             "key": "Content-Type",
             "value": "application/json"
@@ -158,6 +178,10 @@
         "method": "GET",
         "header": [
           {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
             "key": "Authorization",
             "value": "Bearer {{token}}"
           }
@@ -174,6 +198,10 @@
       "request": {
         "method": "GET",
         "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
           {
             "key": "Authorization",
             "value": "Bearer {{token}}"
@@ -194,7 +222,13 @@
           "raw": "{{baseUrl}}/api/auth/profile",
           "host": ["{{baseUrl}}"],
           "path": ["api", "auth", "profile"]
-        }
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
       }
     },
     {
@@ -202,6 +236,10 @@
       "request": {
         "method": "GET",
         "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
           {
             "key": "Authorization",
             "value": "Bearer {{token}}"
@@ -220,6 +258,10 @@
         "method": "GET",
         "header": [
           {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
             "key": "Authorization",
             "value": "Bearer {{token}}"
           }
@@ -237,6 +279,10 @@
         "method": "GET",
         "header": [
           {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
             "key": "Authorization",
             "value": "Bearer {{token}}"
           }
@@ -253,6 +299,10 @@
       "request": {
         "method": "POST",
         "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
           {
             "key": "Authorization",
             "value": "Bearer {{token}}"

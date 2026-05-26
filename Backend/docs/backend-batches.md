@@ -33,7 +33,7 @@ This document records the implementation batches for the backend requirements in
 
 ## Checklist
 
-- [ ] Batch 1 completed
+- [x] Batch 1 completed (archived as `2026-05-20-api-only-backend`)
 - [ ] Batch 2 completed
 - [ ] Batch 3 completed
 - [ ] Batch 4 completed
