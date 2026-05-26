@@ -36,10 +36,7 @@ class UserFactory extends Factory
 
     public function configure(): static
     {
-        return $this->afterCreating(function (User $user) {
-            Role::findOrCreate('patient', 'api');
-            $user->assignRole('patient');
-        });
+        return $this;
     }
 
     public function admin(): static
