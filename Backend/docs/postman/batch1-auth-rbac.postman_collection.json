@@ -1,0 +1,269 @@
+{
+  "info": {
+    "name": "Batch 1 - Auth & RBAC",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Functional tests for Batch 1 (auth + RBAC)"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth - Login (admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "pm.test('has access_token', () => pm.expect(json.access_token).to.be.a('string'));",
+              "pm.environment.set('token', json.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Login (doctor)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"dr@test.com\",\n  \"password\": \"dr123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "pm.environment.set('token', json.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "RBAC - Admin only (doctor should be 403)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin-only",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin-only"]
+        }
+      }
+    },
+    {
+      "name": "RBAC - Admin or Doctor (doctor should be 200)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin-or-doctor",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin-or-doctor"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Login (patient)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"patient@test.com\",\n  \"password\": \"patient123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));",
+              "const json = pm.response.json();",
+              "pm.environment.set('token', json.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "RBAC - Admin only (patient should be 403)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin-only",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin-only"]
+        }
+      }
+    },
+    {
+      "name": "RBAC - Admin or Doctor (patient should be 403)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin-or-doctor",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin-or-doctor"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Profile (no token should be 401)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/profile",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "profile"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/profile",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "profile"]
+        }
+      }
+    },
+    {
+      "name": "RBAC - Admin only",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin-only",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin-only"]
+        }
+      }
+    },
+    {
+      "name": "RBAC - Admin or Doctor",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin-or-doctor",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin-or-doctor"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/logout",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "logout"]
+        }
+      }
+    }
+  ]
+}

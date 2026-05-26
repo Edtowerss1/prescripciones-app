@@ -20,13 +20,13 @@ it('issues a token with valid credentials', function () {
         'password' => bcrypt('secret123'),
     ]);
 
-    $response = $this->postJson('/api/tokens', [
+    $response = $this->postJson('/api/auth/login', [
         'email' => 'jane@example.com',
         'password' => 'secret123',
     ]);
 
     $response->assertCreated()
-        ->assertJsonStructure(['token']);
+        ->assertJsonStructure(['access_token', 'token_type', 'user']);
 });
 
 // Task 3.3
@@ -36,7 +36,7 @@ it('refuses token with invalid credentials', function () {
         'password' => bcrypt('secret123'),
     ]);
 
-    $response = $this->postJson('/api/tokens', [
+    $response = $this->postJson('/api/auth/login', [
         'email' => 'jane@example.com',
         'password' => 'wrong-password',
     ]);
@@ -46,7 +46,7 @@ it('refuses token with invalid credentials', function () {
 
 // Task 3.4
 it('rejects unauthenticated request to protected route', function () {
-    $response = $this->getJson('/api/user');
+    $response = $this->getJson('/api/auth/profile');
 
     $response->assertUnauthorized();
 });
@@ -56,7 +56,7 @@ it('returns the authenticated user with a valid token', function () {
     $user = User::factory()->create();
     $token = $user->createToken('test-token')->plainTextToken;
 
-    $response = $this->withToken($token)->getJson('/api/user');
+    $response = $this->withToken($token)->getJson('/api/auth/profile');
 
     $response->assertOk()
         ->assertJson(['id' => $user->id]);
@@ -65,19 +65,17 @@ it('returns the authenticated user with a valid token', function () {
 // Task 3.6
 it('revokes a token and rejects subsequent requests', function () {
     $user = User::factory()->create();
-    $tokenObj = $user->createToken('revocable');
-    $token = $tokenObj->plainTextToken;
-    $tokenId = $tokenObj->accessToken->id;
+    $token = $user->createToken('revocable')->plainTextToken;
 
     $this->withToken($token)
-        ->deleteJson("/api/tokens/{$tokenId}")
+        ->postJson('/api/auth/logout')
         ->assertNoContent();
 
-    // Forget cached auth guards so the revoked token is re-checked
+    // Reset guard state so the revoked token is re-checked
     app('auth')->forgetGuards();
 
     $this->withToken($token)
-        ->getJson('/api/user')
+        ->getJson('/api/auth/profile')
         ->assertUnauthorized();
 });
 
@@ -90,7 +88,7 @@ it('returns 404 for former web root', function () {
 
 // Task 3.8
 it('returns JSON 422 on validation errors', function () {
-    $response = $this->postJson('/api/tokens', [
+    $response = $this->postJson('/api/auth/login', [
         'email' => 'not-an-email',
         'password' => '',
     ]);
@@ -123,7 +121,7 @@ it('application boots without node_modules', function () {
 
 // Task 5.4 — spec: Invalid token is rejected (previously only covered missing token, not bad token)
 it('rejects request with random invalid token', function () {
-    $response = $this->withToken('invalid-token-12345')->getJson('/api/user');
+    $response = $this->withToken('invalid-token-12345')->getJson('/api/auth/profile');
 
     $response->assertUnauthorized();
 });
