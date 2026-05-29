@@ -36,7 +36,7 @@ This document records the implementation batches for the backend requirements in
 - [x] Batch 1 completed (archived as `2026-05-20-api-only-backend`)
 - [ ] Batch 2 completed
 - [x] Batch 3 completed (archived as `2026-05-28-batch3-core-prescriptions`)
-- [ ] Batch 4 completed
+- [x] Batch 4 completed (archived as `2026-05-28-batch4-requests-resources-errors`)
 - [ ] Batch 5 completed
 - [ ] Batch 6 completed
 - [ ] Batch 7 completed

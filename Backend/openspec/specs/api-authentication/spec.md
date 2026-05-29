@@ -27,6 +27,7 @@ The application SHALL provide an endpoint to create personal access tokens for a
 - WHEN a POST request is sent to `/api/auth/login` with valid email and password
 - THEN the response SHALL be 201
 - AND the response body SHALL contain a `token` field with a plain-text bearer token
+- AND the response body SHALL contain a `user` field using `UserResource`
 
 #### Scenario: Token creation fails with invalid credentials
 
@@ -34,6 +35,22 @@ The application SHALL provide an endpoint to create personal access tokens for a
 - WHEN a POST request is sent to `/api/auth/login` with an incorrect password
 - THEN the response status SHALL be 401
 - AND the response SHALL be JSON
+
+### Requirement: Profile Endpoint
+
+The system MUST provide `GET /api/auth/profile` returning the authenticated user via `UserResource`. Protected by `auth:sanctum`.
+
+#### Scenario: Authenticated user gets profile
+
+- GIVEN a user with a valid Sanctum token
+- WHEN `GET /api/auth/profile`
+- THEN 200 with `UserResource` containing `{id, name, email, role}`
+
+#### Scenario: Unauthenticated request is rejected
+
+- GIVEN no valid token
+- WHEN `GET /api/auth/profile`
+- THEN 401 with `{message, code: "UNAUTHORIZED"}`
 
 ### Requirement: Protected Route Enforcement
 

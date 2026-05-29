@@ -1,27 +1,6 @@
-# prescription-lifecycle Specification
+# Delta for prescription-lifecycle
 
-## Purpose
-
-Core prescription lifecycle: doctor creates/manages prescriptions with items, patient views and marks them consumed. Ownership-based authorization via `PrescriptionPolicy`.
-
-## Dependencies
-
-- `api-authentication` — Sanctum bearer tokens and protected route enforcement.
-- `rbac-auth` — Spatie role middleware (`role:doctor`, `role:patient`) and `HasRoles` trait.
-
-## Requirements
-
-### Requirement: Schema Alignment
-
-The `prescriptions` table MUST include `notes` (text, nullable), `consumed_at` (timestamp, nullable), and a composite index on `(status, created_at)`. The `prescription_items` table MUST rename `medication_name` to `name` and include `quantity` (integer).
-
-#### Scenario: Schema matches requirements
-
-- GIVEN the Batch 3 migration has run
-- WHEN the database schema is inspected
-- THEN `prescriptions` SHALL have columns `notes` and `consumed_at`
-- AND `prescription_items` SHALL have `name` (not `medication_name`) and `quantity`
-- AND a composite index `(status, created_at)` SHALL exist on `prescriptions`
+## ADDED Requirements
 
 ### Requirement: PrescriptionResource Contract
 
@@ -51,9 +30,12 @@ The `prescriptions` table MUST include `notes` (text, nullable), `consumed_at` (
 - THEN response contains `id`, `name`, `dosage`, `quantity`, `instructions`
 - AND does NOT contain `prescription_id`
 
+## MODIFIED Requirements
+
 ### Requirement: Doctor Creates Prescription
 
 The system MUST allow doctors to create prescriptions via `POST /api/prescriptions`, validated by `StorePrescriptionRequest` with nested `items.*` rules (name required|string|max:255, quantity required|integer|min:1, dosage nullable|string, instructions nullable|string). Response SHALL return `PrescriptionResource` with items loaded. Protected by `auth:sanctum` and `role:doctor`.
+(Previously: inline validation and raw model arrays.)
 
 #### Scenario: Valid creation
 
@@ -76,6 +58,7 @@ The system MUST allow doctors to create prescriptions via `POST /api/prescriptio
 ### Requirement: Doctor Lists Own Prescriptions
 
 The system MUST allow doctors to list their prescriptions via `GET /api/prescriptions`, validated by `PrescriptionFilterRequest` (status nullable|string|in:pending,consumed, from/to nullable|date). Results SHALL be paginated (default 15, max 100), ordered by `created_at DESC`. Response SHALL use `PrescriptionResource` collection without items loaded. Protected by `auth:sanctum` and `role:doctor`.
+(Previously: inline validation and raw model arrays.)
 
 #### Scenario: Filter by status
 
@@ -98,6 +81,7 @@ The system MUST allow doctors to list their prescriptions via `GET /api/prescrip
 ### Requirement: Prescription Detail
 
 The system MUST provide detail via `GET /api/prescriptions/{id}` using implicit route model binding. Authorization SHALL use `PrescriptionPolicy::view`. Response MUST use `PrescriptionResource` with items loaded. Unauthorized users SHALL receive 404 with `code: "NOT_FOUND"`.
+(Previously: raw model arrays; error format unspecified.)
 
 #### Scenario: Owner doctor views prescription
 
@@ -126,6 +110,7 @@ The system MUST provide detail via `GET /api/prescriptions/{id}` using implicit 
 ### Requirement: Patient Consumes Prescription
 
 The system MUST allow patients to mark prescriptions as consumed via `PUT /api/prescriptions/{id}/consume`, validated by `ConsumePrescriptionRequest`. Only `pending`→`consumed` transition is permitted. On success, `consumed_at` SHALL be set. Response SHALL use `PrescriptionResource`. Authorization: `PrescriptionPolicy::consume`.
+(Previously: inline validation and raw model arrays.)
 
 #### Scenario: Patient consumes own pending prescription
 
@@ -135,7 +120,7 @@ The system MUST allow patients to mark prescriptions as consumed via `PUT /api/p
 
 #### Scenario: Already consumed returns conflict
 
-- GIVEN an authenticated patient with an already-consumed prescription #1
+- GIVEN an authenticated patient with already-consumed prescription #1
 - WHEN PUT `/api/prescriptions/1/consume`
 - THEN 409 with `{message, code: "CONFLICT"}`
 
@@ -148,6 +133,7 @@ The system MUST allow patients to mark prescriptions as consumed via `PUT /api/p
 ### Requirement: Patient Lists Own Prescriptions
 
 The system MUST allow patients to list their prescriptions via `GET /api/me/prescriptions`, validated by `PrescriptionFilterRequest`. Results SHALL be paginated, ordered by `created_at DESC`. Response SHALL use `PrescriptionResource` collection. Protected by `auth:sanctum` and `role:patient`.
+(Previously: inline validation and raw model arrays.)
 
 #### Scenario: Patient lists prescriptions
 
@@ -160,37 +146,3 @@ The system MUST allow patients to list their prescriptions via `GET /api/me/pres
 - GIVEN an authenticated patient with pending and consumed prescriptions
 - WHEN GET `/api/me/prescriptions?status=consumed`
 - THEN 200 with only consumed prescriptions
-
-### Requirement: Prescription Policy
-
-The application SHALL define `PrescriptionPolicy` with three abilities: `create` (doctor role only), `view` (admin OR doctor-owner OR patient-owner), and `consume` (patient-owner only). Ownership is determined by `prescription.doctor.user_id === $user->id` for doctors and `prescription.patient.user_id === $user->id` for patients.
-
-#### Scenario: Doctor can create; patient cannot
-
-- GIVEN a user with role `doctor`
-- WHEN `PrescriptionPolicy::create` is evaluated
-- THEN it SHALL return true
-- AND for a user with role `patient` it SHALL return false
-
-#### Scenario: Admin can view any prescription
-
-- GIVEN a user with role `admin`
-- WHEN `PrescriptionPolicy::view` is evaluated for any prescription
-- THEN it SHALL return true
-
-#### Scenario: Non-owner doctor cannot view
-
-- GIVEN a doctor and a prescription created by a different doctor
-- WHEN `PrescriptionPolicy::view` is evaluated
-- THEN it SHALL return false
-
-### Requirement: Transactional Creation
-
-Prescription and items creation MUST be atomic. If any item fails, the entire operation SHALL roll back — no orphan prescription without items and no orphan items without prescription.
-
-#### Scenario: All-or-nothing creation
-
-- GIVEN a valid request with items
-- WHEN the creation service executes
-- THEN prescription and all items SHALL persist together
-- AND a rollback SHALL occur if any item insert fails

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PrescriptionController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,8 @@ Route::middleware(['auth:sanctum', 'role:admin|doctor'])->group(function () {
     Route::get('/admin-or-doctor', function () {
         return response()->json(['message' => 'Welcome admin or doctor']);
     });
+
+    Route::get('/patients', [PatientController::class, 'index']);
 });
 
 // Doctor-only: create + list own prescriptions
