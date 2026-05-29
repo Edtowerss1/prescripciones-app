@@ -123,6 +123,42 @@ The system MUST provide detail via `GET /api/prescriptions/{id}` using implicit 
 - WHEN GET `/api/prescriptions/5`
 - THEN 404 with `{message, code: "NOT_FOUND"}`
 
+### Requirement: Prescription PDF Download
+
+The system MUST provide a PDF download endpoint via `GET /api/prescriptions/{id}/pdf`, protected by `auth:sanctum`. The response SHALL force download as `prescription-{code}.pdf` with `Content-Type: application/pdf`. Authorization SHALL reuse `PrescriptionPolicy::view`, and unauthorized users MUST receive 404 without leaking whether the prescription exists. The generated PDF MUST render the prescription code, creation date, status, patient name, doctor name, doctor specialty, notes when present, and the items table. Relationships SHALL be eager-loaded (`items`, `doctor.user`, `patient.user`) to avoid N+1 queries.
+
+#### Scenario: Doctor owner downloads PDF
+
+- GIVEN an authenticated doctor who created prescription #1
+- WHEN GET `/api/prescriptions/1/pdf`
+- THEN 200 with `Content-Type: application/pdf`
+- AND `Content-Disposition` SHALL contain `attachment; filename="prescription-{code}.pdf"`
+
+#### Scenario: Patient owner downloads PDF
+
+- GIVEN an authenticated patient assigned to prescription #1
+- WHEN GET `/api/prescriptions/1/pdf`
+- THEN 200 with `Content-Type: application/pdf`
+- AND response body SHALL be non-empty PDF binary
+
+#### Scenario: Non-owner gets 404
+
+- GIVEN an authenticated doctor who did NOT create prescription #5
+- WHEN GET `/api/prescriptions/5/pdf`
+- THEN 404 with `{message, code: "NOT_FOUND"}`
+
+#### Scenario: Non-existent prescription returns 404
+
+- GIVEN an authenticated user (any role)
+- WHEN GET `/api/prescriptions/99999/pdf`
+- THEN 404 with `{message, code: "NOT_FOUND"}` via implicit route model binding
+
+#### Scenario: PDF contains all required fields
+
+- GIVEN a prescription with items, doctor, and patient loaded
+- WHEN the PDF view is rendered
+- THEN the rendered HTML SHALL contain the prescription code, status, created date, notes, patient name, doctor name, specialty, and every item's name, dosage, quantity, and instructions
+
 ### Requirement: Patient Consumes Prescription
 
 The system MUST allow patients to mark prescriptions as consumed via `PUT /api/prescriptions/{id}/consume`, validated by `ConsumePrescriptionRequest`. Only `pending`→`consumed` transition is permitted. On success, `consumed_at` SHALL be set. Response SHALL use `PrescriptionResource`. Authorization: `PrescriptionPolicy::consume`.
