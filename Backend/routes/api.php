@@ -46,6 +46,7 @@ Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
 // Authenticated (policy-gated): detail + consume
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/prescriptions/{prescription}', [PrescriptionController::class, 'show']);
+    Route::get('/prescriptions/{prescription}/pdf', [PrescriptionController::class, 'pdf']);
     Route::put('/prescriptions/{prescription}/consume', [PrescriptionController::class, 'consume']);
 });
 

@@ -8,9 +8,11 @@ use App\Http\Requests\Prescriptions\StorePrescriptionRequest;
 use App\Http\Resources\PrescriptionResource;
 use App\Models\Patient;
 use App\Models\Prescription;
+use App\Services\PdfService;
 use App\Services\PrescriptionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
 class PrescriptionController extends Controller
@@ -83,6 +85,20 @@ class PrescriptionController extends Controller
         return (new PrescriptionResource(
             $prescription->load(['items', 'doctor.user', 'patient.user'])
         ))->response();
+    }
+
+    /**
+     * Download a prescription as PDF.
+     *
+     * GET /api/prescriptions/{prescription}/pdf
+     */
+    public function pdf(Prescription $prescription, PdfService $pdfService): Response
+    {
+        if (! Gate::allows('view', $prescription)) {
+            abort(404);
+        }
+
+        return $pdfService->generatePrescriptionPdf($prescription);
     }
 
     /**
