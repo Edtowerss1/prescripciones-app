@@ -108,6 +108,10 @@ class PrescriptionController extends Controller
      */
     public function consume(ConsumePrescriptionRequest $request, Prescription $prescription, PrescriptionService $svc): JsonResponse
     {
+        if (! Gate::allows('consume', $prescription)) {
+            abort(404);
+        }
+
         $prescription = $svc->consumePrescription($prescription);
 
         return (new PrescriptionResource($prescription))->response();

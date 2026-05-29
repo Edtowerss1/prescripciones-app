@@ -91,7 +91,8 @@ test('POST /api/auth/login rejects invalid credentials', function () {
         'password' => 'wrong-password',
     ]);
 
-    $response->assertUnauthorized();
+    $response->assertUnauthorized()
+        ->assertJsonStructure(['message', 'code', 'details']);
 });
 
 test('POST /api/auth/login returns validation errors for missing fields', function () {
@@ -123,7 +124,8 @@ test('GET /api/auth/profile returns authenticated user with role', function () {
 test('GET /api/auth/profile rejects unauthenticated requests', function () {
     $response = $this->getJson('/api/auth/profile');
 
-    $response->assertUnauthorized();
+    $response->assertUnauthorized()
+        ->assertJsonStructure(['message', 'code', 'details']);
 });
 
 // --------------------------------------------------------------------
@@ -164,13 +166,15 @@ test('role middleware forbids user without required role', function () {
 
     $response = $this->withToken($token)->getJson('/api/admin-only');
 
-    $response->assertForbidden();
+    $response->assertForbidden()
+        ->assertJsonStructure(['message', 'code', 'details']);
 });
 
 test('role middleware rejects unauthenticated user', function () {
     $response = $this->getJson('/api/admin-only');
 
-    $response->assertUnauthorized();
+    $response->assertUnauthorized()
+        ->assertJsonStructure(['message', 'code', 'details']);
 });
 
 test('role middleware supports multiple roles via pipe', function () {

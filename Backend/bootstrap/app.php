@@ -7,6 +7,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -37,6 +38,14 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AuthorizationException $e) {
+            return response()->json([
+                'message' => $e->getMessage() ?: 'Forbidden',
+                'code' => 'FORBIDDEN',
+                'details' => (object) [],
+            ], 403);
+        });
+
+        $exceptions->render(function (UnauthorizedException $e) {
             return response()->json([
                 'message' => $e->getMessage() ?: 'Forbidden',
                 'code' => 'FORBIDDEN',
