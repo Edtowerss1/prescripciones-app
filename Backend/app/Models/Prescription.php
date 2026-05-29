@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['doctor_id', 'patient_id', 'status'])]
+#[Fillable(['doctor_id', 'patient_id', 'status', 'notes'])]
 class Prescription extends Model
 {
     /** @use HasFactory<PrescriptionFactory> */
@@ -42,6 +42,7 @@ class Prescription extends Model
     {
         return [
             'status' => 'string',
+            'consumed_at' => 'datetime',
         ];
     }
 }

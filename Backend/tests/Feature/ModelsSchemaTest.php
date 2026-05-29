@@ -32,14 +32,14 @@ it('has the patients table with expected columns', function () {
 it('has the prescriptions table with expected columns', function () {
     expect(Schema::hasTable('prescriptions'))->toBeTrue();
     expect(Schema::hasColumns('prescriptions', [
-        'id', 'code', 'doctor_id', 'patient_id', 'status', 'created_at', 'updated_at',
+        'id', 'code', 'doctor_id', 'patient_id', 'status', 'notes', 'consumed_at', 'created_at', 'updated_at',
     ]))->toBeTrue();
 });
 
 it('has the prescription_items table with expected columns', function () {
     expect(Schema::hasTable('prescription_items'))->toBeTrue();
     expect(Schema::hasColumns('prescription_items', [
-        'id', 'prescription_id', 'medication_name', 'dosage', 'instructions', 'created_at', 'updated_at',
+        'id', 'prescription_id', 'name', 'quantity', 'dosage', 'instructions', 'created_at', 'updated_at',
     ]))->toBeTrue();
 });
 
@@ -135,14 +135,16 @@ it('navigates all prescription relationships', function () {
 
     $item1 = PrescriptionItem::create([
         'prescription_id' => $prescription->id,
-        'medication_name' => 'Ibuprofen',
+        'name' => 'Ibuprofen',
+        'quantity' => 30,
         'dosage' => '400mg',
         'instructions' => 'Take with food',
     ]);
 
     $item2 = PrescriptionItem::create([
         'prescription_id' => $prescription->id,
-        'medication_name' => 'Paracetamol',
+        'name' => 'Paracetamol',
+        'quantity' => 20,
         'dosage' => '500mg',
         'instructions' => 'Every 8 hours',
     ]);
@@ -152,7 +154,7 @@ it('navigates all prescription relationships', function () {
     expect($prescription->items)->toHaveCount(2);
 
     expect($item1->prescription->id)->toBe($prescription->id);
-    expect($item1->medication_name)->toBe('Ibuprofen');
+    expect($item1->name)->toBe('Ibuprofen');
     expect($item2->prescription->id)->toBe($prescription->id);
 });
 
