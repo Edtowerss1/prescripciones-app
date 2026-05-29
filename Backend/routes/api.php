@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminMetricController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PrescriptionController;
@@ -27,6 +28,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/admin-only', function () {
         return response()->json(['message' => 'Welcome admin']);
     });
+
+    Route::get('/admin/metrics', [AdminMetricController::class, 'index']);
 });
 
 Route::middleware(['auth:sanctum', 'role:admin|doctor'])->group(function () {
