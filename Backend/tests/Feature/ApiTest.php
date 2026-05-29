@@ -94,7 +94,7 @@ it('returns JSON 422 on validation errors', function () {
     ]);
 
     $response->assertUnprocessable()
-        ->assertJsonStructure(['message', 'errors']);
+        ->assertJsonStructure(['message', 'code', 'details']);
 });
 
 // Task 3.9
@@ -102,7 +102,7 @@ it('returns JSON 404 on non-existent API route', function () {
     $response = $this->getJson('/api/non-existent');
 
     $response->assertNotFound()
-        ->assertJsonStructure(['message']);
+        ->assertJsonStructure(['message', 'code', 'details']);
 });
 
 // Task 3.10

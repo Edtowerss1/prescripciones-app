@@ -51,7 +51,11 @@ class PrescriptionService
     {
         if ($prescription->status !== 'pending') {
             throw new HttpResponseException(
-                response()->json(['message' => 'Prescription is already consumed'], 409)
+                response()->json([
+                    'message' => 'Prescription is already consumed',
+                    'code' => 'CONFLICT',
+                    'details' => (object) [],
+                ], 409)
             );
         }
 

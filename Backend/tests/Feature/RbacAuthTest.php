@@ -98,7 +98,7 @@ test('POST /api/auth/login returns validation errors for missing fields', functi
     $response = $this->postJson('/api/auth/login', []);
 
     $response->assertUnprocessable()
-        ->assertJsonStructure(['message', 'errors']);
+        ->assertJsonStructure(['message', 'code', 'details']);
 });
 
 // --------------------------------------------------------------------
