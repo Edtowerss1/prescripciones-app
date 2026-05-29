@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
@@ -16,26 +15,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Roles
         foreach (['admin', 'doctor', 'patient'] as $roleName) {
             Role::findOrCreate($roleName, 'api');
         }
 
-        User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@test.com',
-            'password' => 'admin123',
-        ])->syncRoles('admin');
+        // Users + profiles
+        $this->call(UserSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Doctor',
-            'email' => 'dr@test.com',
-            'password' => 'dr123',
-        ])->syncRoles('doctor');
-
-        User::factory()->create([
-            'name' => 'Patient',
-            'email' => 'patient@test.com',
-            'password' => 'patient123',
-        ])->syncRoles('patient');
+        // Prescriptions
+        $this->call(PrescriptionSeeder::class);
     }
 }

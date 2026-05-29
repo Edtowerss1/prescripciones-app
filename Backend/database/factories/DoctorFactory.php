@@ -20,7 +20,16 @@ class DoctorFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'specialty' => fake()->word(),
+            'specialty' => fake()->randomElement([
+                'Cardiología',
+                'Pediatría',
+                'Dermatología',
+                'Neurología',
+                'Traumatología',
+                'Medicina General',
+                'Oftalmología',
+                'Ginecología',
+            ]),
             'license_number' => fake()->unique()->numerify('LIC-####'),
         ];
     }
