@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PrescriptionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,4 +32,21 @@ Route::middleware(['auth:sanctum', 'role:admin|doctor'])->group(function () {
     Route::get('/admin-or-doctor', function () {
         return response()->json(['message' => 'Welcome admin or doctor']);
     });
+});
+
+// Doctor-only: create + list own prescriptions
+Route::middleware(['auth:sanctum', 'role:doctor'])->group(function () {
+    Route::post('/prescriptions', [PrescriptionController::class, 'store']);
+    Route::get('/prescriptions', [PrescriptionController::class, 'index']);
+});
+
+// Authenticated (policy-gated): detail + consume
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/prescriptions/{prescription}', [PrescriptionController::class, 'show']);
+    Route::put('/prescriptions/{prescription}/consume', [PrescriptionController::class, 'consume']);
+});
+
+// Patient-only: list own prescriptions
+Route::middleware(['auth:sanctum', 'role:patient'])->group(function () {
+    Route::get('/me/prescriptions', [PrescriptionController::class, 'myPrescriptions']);
 });

@@ -20,7 +20,8 @@ class PrescriptionItemFactory extends Factory
     {
         return [
             'prescription_id' => Prescription::factory(),
-            'medication_name' => fake()->word(),
+            'name' => fake()->word(),
+            'quantity' => fake()->numberBetween(1, 100),
             'dosage' => fake()->randomElement(['10mg', '25mg', '50mg', '100mg', '500mg']),
             'instructions' => fake()->sentence(),
         ];

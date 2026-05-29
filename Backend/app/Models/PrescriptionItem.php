@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['prescription_id', 'medication_name', 'dosage', 'instructions'])]
+#[Fillable(['prescription_id', 'name', 'quantity', 'dosage', 'instructions'])]
 class PrescriptionItem extends Model
 {
     /** @use HasFactory<PrescriptionItemFactory> */

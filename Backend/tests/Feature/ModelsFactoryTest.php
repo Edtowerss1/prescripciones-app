@@ -90,7 +90,8 @@ test('prescription item factory creates an item', function () {
     $item = PrescriptionItem::factory()->create();
 
     expect($item)->not->toBeNull();
-    expect($item->medication_name)->not->toBeEmpty();
+    expect($item->name)->not->toBeEmpty();
+    expect($item->quantity)->toBeGreaterThanOrEqual(1);
     expect($item->prescription_id)->not->toBeNull();
 });
 
