@@ -1,0 +1,1186 @@
+{
+  "info": {
+    "name": "Prescriptions API — Full",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección completa de todos los endpoints de la Prescriptions API. Incluye flujos felices, edge cases y errores para los 3 roles (admin, doctor, patient). Requiere migrate:fresh --seed antes de ejecutar."
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api" },
+    { "key": "admin_token", "value": "" },
+    { "key": "doctor_token", "value": "" },
+    { "key": "patient_token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "00-Setup Login",
+      "description": "Ejecutá estos 3 requests primero para obtener los tokens de cada rol. Los tokens se guardan automáticamente en las variables de colección.",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has access_token', () => pm.expect(json.access_token).to.be.a('string'));",
+                  "pm.test('Role is admin', () => pm.expect(json.user.role).to.eql('admin'));",
+                  "pm.collectionVariables.set('admin_token', json.access_token);",
+                  "console.log('Admin token saved');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"admin123\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Role is doctor', () => pm.expect(json.user.role).to.eql('doctor'));",
+                  "pm.collectionVariables.set('doctor_token', json.access_token);",
+                  "console.log('Doctor token saved');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"dr@test.com\",\n  \"password\": \"dr123\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Role is patient', () => pm.expect(json.user.role).to.eql('patient'));",
+                  "pm.collectionVariables.set('patient_token', json.access_token);",
+                  "console.log('Patient token saved');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"patient@test.com\",\n  \"password\": \"patient123\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01-Auth",
+      "description": "Perfil, logout y casos de error de autenticación.",
+      "item": [
+        {
+          "name": "Profile (doctor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has id, name, email, role', () => {",
+                  "  pm.expect(json.id).to.be.a('number');",
+                  "  pm.expect(json.name).to.be.a('string');",
+                  "  pm.expect(json.email).to.be.a('string');",
+                  "  pm.expect(json.role).to.eql('doctor');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/auth/profile", "host": ["{{base_url}}"], "path": ["auth", "profile"] }
+          }
+        },
+        {
+          "name": "Profile (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/auth/profile", "host": ["{{base_url}}"], "path": ["auth", "profile"] }
+          }
+        },
+        {
+          "name": "Profile — Sin token (401)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/auth/profile", "host": ["{{base_url}}"], "path": ["auth", "profile"] }
+          }
+        },
+        {
+          "name": "Login — Credenciales incorrectas (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "const json = pm.response.json();",
+                  "pm.test('Error envelope', () => {",
+                  "  pm.expect(json.message).to.be.a('string');",
+                  "  pm.expect(json.code).to.eql('UNAUTHORIZED');",
+                  "  pm.expect(json.details).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"noexiste@test.com\",\n  \"password\": \"cualquiera\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login — Campos vacíos (422)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "const json = pm.response.json();",
+                  "pm.test('Code VALIDATION_ERROR', () => pm.expect(json.code).to.eql('VALIDATION_ERROR'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"\",\n  \"password\": \"\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Logout (doctor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('Status 204', () => pm.response.to.have.status(204));"] }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02-Admin",
+      "description": "Endpoints exclusivos de admin. Requiere admin_token del setup.",
+      "item": [
+        {
+          "name": "Metrics — Dashboard completo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json().data;",
+                  "pm.test('Totals present', () => {",
+                  "  pm.expect(d.totals).to.have.property('doctors');",
+                  "  pm.expect(d.totals).to.have.property('patients');",
+                  "  pm.expect(d.totals).to.have.property('prescriptions');",
+                  "});",
+                  "pm.test('By status present', () => {",
+                  "  pm.expect(d.by_status).to.have.property('pending');",
+                  "  pm.expect(d.by_status).to.have.property('consumed');",
+                  "});",
+                  "pm.test('By day is array', () => pm.expect(d.by_day).to.be.an('array'));",
+                  "pm.test('Top doctors is array', () => pm.expect(d.top_doctors).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/metrics?from=2026-01-01&to=2026-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "metrics"],
+              "query": [
+                { "key": "from", "value": "2026-01-01" },
+                { "key": "to", "value": "2026-12-31" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Metrics — Sin filtros",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/admin/metrics", "host": ["{{base_url}}"], "path": ["admin", "metrics"] }
+          }
+        },
+        {
+          "name": "Metrics — Desde doctor (403)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/admin/metrics", "host": ["{{base_url}}"], "path": ["admin", "metrics"] }
+          }
+        },
+        {
+          "name": "Users — Listar todos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has data array', () => pm.expect(json.data).to.be.an('array'));",
+                  "pm.test('Has pagination meta', () => pm.expect(json.meta).to.be.an('object'));",
+                  "if (json.data.length > 0) {",
+                  "  const u = json.data[0];",
+                  "  pm.test('User has id,name,email,role', () => {",
+                  "    pm.expect(u.id).to.be.a('number');",
+                  "    pm.expect(u.name).to.be.a('string');",
+                  "    pm.expect(u.email).to.be.a('string');",
+                  "    pm.expect(u.role).to.be.a('string');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Users — Filtrar por rol (doctor)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users?role=doctor",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [{ "key": "role", "value": "doctor" }]
+            }
+          }
+        },
+        {
+          "name": "Users — Buscar por nombre/email",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users?query=Dr",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [{ "key": "query", "value": "Dr" }]
+            }
+          }
+        },
+        {
+          "name": "Users — Crear doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has data.id', () => pm.expect(json.data.id).to.be.a('number'));",
+                  "pm.test('Role is doctor', () => pm.expect(json.data.role).to.eql('doctor'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dra. García\",\n  \"email\": \"dra.garcia@test.com\",\n  \"password\": \"password123\",\n  \"role\": \"doctor\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Users — Crear paciente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Role is patient', () => pm.expect(pm.response.json().data.role).to.eql('patient'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Paciente Nuevo\",\n  \"email\": \"paciente.nuevo@test.com\",\n  \"password\": \"password123\",\n  \"role\": \"patient\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Users — Email duplicado (422)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 422', () => pm.response.to.have.status(422));"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Duplicado\",\n  \"email\": \"dra.garcia@test.com\",\n  \"password\": \"password123\",\n  \"role\": \"doctor\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Users — Rol inválido (422)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 422', () => pm.response.to.have.status(422));"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rol Malo\",\n  \"email\": \"rolmalo@test.com\",\n  \"password\": \"password123\",\n  \"role\": \"enfermero\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Users — Desde doctor (403)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Doctors — Listar todos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has data', () => pm.expect(json.data).to.be.an('array'));",
+                  "if (json.data.length > 0) {",
+                  "  const d = json.data[0];",
+                  "  pm.test('Doctor has user, specialty, license_number, prescriptions_count', () => {",
+                  "    pm.expect(d.user).to.be.an('object');",
+                  "    pm.expect(d).to.have.property('specialty');",
+                  "    pm.expect(d).to.have.property('license_number');",
+                  "    pm.expect(d).to.have.property('prescriptions_count');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/doctors", "host": ["{{base_url}}"], "path": ["doctors"] }
+          }
+        },
+        {
+          "name": "Doctors — Buscar por nombre",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/doctors?query=Dr",
+              "host": ["{{base_url}}"],
+              "path": ["doctors"],
+              "query": [{ "key": "query", "value": "Dr" }]
+            }
+          }
+        },
+        {
+          "name": "Doctors — Desde doctor (403)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/doctors", "host": ["{{base_url}}"], "path": ["doctors"] }
+          }
+        },
+        {
+          "name": "Patients — Listar todos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has data', () => pm.expect(json.data).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patients?query=Test",
+              "host": ["{{base_url}}"],
+              "path": ["patients"],
+              "query": [{ "key": "query", "value": "Test" }]
+            }
+          }
+        },
+        {
+          "name": "Admin Prescriptions — Listar todas con filtros",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has paginated data', () => {",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "  pm.expect(json.meta).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/prescriptions?status=pending&from=2026-01-01&to=2026-12-31&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "prescriptions"],
+              "query": [
+                { "key": "status", "value": "pending" },
+                { "key": "from", "value": "2026-01-01" },
+                { "key": "to", "value": "2026-12-31" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Prescriptions — Filtrar por doctor y paciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/prescriptions?doctor_id=1&patient_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "prescriptions"],
+              "query": [
+                { "key": "doctor_id", "value": "1" },
+                { "key": "patient_id", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Prescriptions — Desde paciente (403)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/admin/prescriptions", "host": ["{{base_url}}"], "path": ["admin", "prescriptions"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03-Doctor",
+      "description": "Flujo completo de médico: buscar pacientes, crear prescripción, listar, detalle, PDF. Requiere doctor_token del setup.",
+      "item": [
+        {
+          "name": "Patients — Buscar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has data array', () => pm.expect(json.data).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patients?query=Test&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["patients"],
+              "query": [
+                { "key": "query", "value": "Test" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Prescriptions — Crear",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Status is pending', () => pm.expect(json.data.status).to.eql('pending'));",
+                  "pm.test('Has items array', () => pm.expect(json.data.items).to.be.an('array').with.lengthOf(2));",
+                  "pm.test('Has code (UUID)', () => pm.expect(json.data.code).to.match(/^[0-9a-f-]+$/));",
+                  "pm.collectionVariables.set('rx_id', json.data.id);",
+                  "console.log('Prescription created: ' + json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_id\": 1,\n  \"notes\": \"Tomar con abundante agua\",\n  \"items\": [\n    {\n      \"name\": \"Amoxicilina 500mg\",\n      \"dosage\": \"1 cada 8 horas\",\n      \"quantity\": 15,\n      \"instructions\": \"Después de comer\"\n    },\n    {\n      \"name\": \"Ibuprofeno 400mg\",\n      \"dosage\": \"1 cada 12 horas\",\n      \"quantity\": 10,\n      \"instructions\": \"Con comida\"\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/prescriptions", "host": ["{{base_url}}"], "path": ["prescriptions"] }
+          }
+        },
+        {
+          "name": "Prescriptions — Sin items (422)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 422', () => pm.response.to.have.status(422));"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"patient_id\": 1,\n  \"items\": []\n}" },
+            "url": { "raw": "{{base_url}}/prescriptions", "host": ["{{base_url}}"], "path": ["prescriptions"] }
+          }
+        },
+        {
+          "name": "Prescriptions — Patient inexistente (422)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 422', () => pm.response.to.have.status(422));"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_id\": 9999,\n  \"items\": [{ \"name\": \"X\", \"quantity\": 1 }]\n}"
+            },
+            "url": { "raw": "{{base_url}}/prescriptions", "host": ["{{base_url}}"], "path": ["prescriptions"] }
+          }
+        },
+        {
+          "name": "Prescriptions — Desde paciente (403)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_id\": 1,\n  \"items\": [{ \"name\": \"X\", \"quantity\": 1 }]\n}"
+            },
+            "url": { "raw": "{{base_url}}/prescriptions", "host": ["{{base_url}}"], "path": ["prescriptions"] }
+          }
+        },
+        {
+          "name": "Prescriptions — Listar mis recetas con filtros",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has data', () => pm.expect(json.data).to.be.an('array'));",
+                  "if (json.data.length > 0) {",
+                  "  pm.test('Prescription has doctor/patient/items', () => {",
+                  "    const p = json.data[0];",
+                  "    pm.expect(p.doctor).to.be.an('object');",
+                  "    pm.expect(p.patient).to.be.an('object');",
+                  "    pm.expect(p.items).to.be.an('array');",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions?status=pending&from=2026-01-01&to=2026-12-31&order=desc&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions"],
+              "query": [
+                { "key": "status", "value": "pending" },
+                { "key": "from", "value": "2026-01-01" },
+                { "key": "to", "value": "2026-12-31" },
+                { "key": "order", "value": "desc" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Prescriptions — Orden ascendente",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions?order=asc",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions"],
+              "query": [{ "key": "order", "value": "asc" }]
+            }
+          }
+        },
+        {
+          "name": "Prescriptions — Orden inválido (422)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 422', () => pm.response.to.have.status(422));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions?order=invalid",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions"],
+              "query": [{ "key": "order", "value": "invalid" }]
+            }
+          }
+        },
+        {
+          "name": "Prescriptions — Detalle",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json().data;",
+                  "pm.test('Has all fields', () => {",
+                  "  pm.expect(p.id).to.be.a('number');",
+                  "  pm.expect(p.code).to.be.a('string');",
+                  "  pm.expect(p.status).to.be.oneOf(['pending', 'consumed']);",
+                  "  pm.expect(p.doctor).to.be.an('object');",
+                  "  pm.expect(p.patient).to.be.an('object');",
+                  "  pm.expect(p.items).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions/{{rx_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions", "{{rx_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Prescriptions — Detalle que no es mio (404)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions/9999",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions", "9999"]
+            }
+          }
+        },
+        {
+          "name": "PDF — Descargar prescripción",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Content-Type is PDF', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('pdf'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions/{{rx_id}}/pdf",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions", "{{rx_id}}", "pdf"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04-Patient",
+      "description": "Flujo completo de paciente: listar recetas, detalle, marcar consumida, descargar PDF. Requiere patient_token del setup.",
+      "item": [
+        {
+          "name": "My Prescriptions — Listar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has data', () => pm.expect(json.data).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/me/prescriptions?status=pending&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["me", "prescriptions"],
+              "query": [
+                { "key": "status", "value": "pending" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "My Prescriptions — Filtrar consumidas",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/me/prescriptions?status=consumed",
+              "host": ["{{base_url}}"],
+              "path": ["me", "prescriptions"],
+              "query": [{ "key": "status", "value": "consumed" }]
+            }
+          }
+        },
+        {
+          "name": "My Prescriptions — Desde doctor (403)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 403', () => pm.response.to.have.status(403));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/me/prescriptions", "host": ["{{base_url}}"], "path": ["me", "prescriptions"] }
+          }
+        },
+        {
+          "name": "Prescriptions — Detalle",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json().data;",
+                  "pm.test('Has status', () => pm.expect(p.status).to.be.oneOf(['pending', 'consumed']));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions/{{rx_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions", "{{rx_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Consume — Marcar como consumida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const p = pm.response.json().data;",
+                  "pm.test('Status is consumed', () => pm.expect(p.status).to.eql('consumed'));",
+                  "pm.test('Has consumed_at', () => pm.expect(p.consumed_at).to.be.a('string').and.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions/{{rx_id}}/consume",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions", "{{rx_id}}", "consume"]
+            }
+          }
+        },
+        {
+          "name": "Consume — Ya consumida (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "const json = pm.response.json();",
+                  "pm.test('Code CONFLICT', () => pm.expect(json.code).to.eql('CONFLICT'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions/{{rx_id}}/consume",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions", "{{rx_id}}", "consume"]
+            }
+          }
+        },
+        {
+          "name": "Consume — Desde doctor (404 — oculta existencia)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{doctor_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions/{{rx_id}}/consume",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions", "{{rx_id}}", "consume"]
+            }
+          }
+        },
+        {
+          "name": "PDF — Descargar prescripción",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Content-Type is PDF', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('pdf'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions/{{rx_id}}/pdf",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions", "{{rx_id}}", "pdf"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05-Global Errors",
+      "description": "Casos de error globales: sin auth, token inválido, rate limiting.",
+      "item": [
+        {
+          "name": "Sin token — 401",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/prescriptions", "host": ["{{base_url}}"], "path": ["prescriptions"] }
+          }
+        },
+        {
+          "name": "Token inválido — 401",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 401', () => pm.response.to.have.status(401));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer token_invalido_123" }
+            ],
+            "url": { "raw": "{{base_url}}/prescriptions", "host": ["{{base_url}}"], "path": ["prescriptions"] }
+          }
+        },
+        {
+          "name": "Recurso inexistente — 404",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/prescriptions/99999",
+              "host": ["{{base_url}}"],
+              "path": ["prescriptions", "99999"]
+            }
+          }
+        },
+        {
+          "name": "Ruta inexistente — 404",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Status 404', () => pm.response.to.have.status(404));"] } }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/ruta-que-no-existe", "host": ["{{base_url}}"], "path": ["ruta-que-no-existe"] }
+          }
+        }
+      ]
+    }
+  ]
+}
