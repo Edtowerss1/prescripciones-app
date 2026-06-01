@@ -12,6 +12,7 @@ use App\Services\PdfService;
 use App\Services\PrescriptionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
@@ -42,6 +43,50 @@ class PrescriptionController extends Controller
     }
 
     /**
+     * Admin lists all prescriptions with filters.
+     *
+     * GET /api/admin/prescriptions
+     */
+    public function adminIndex(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => ['nullable', 'in:pending,consumed'],
+            'doctor_id' => ['nullable', 'integer', 'exists:doctors,id'],
+            'patient_id' => ['nullable', 'integer', 'exists:patients,id'],
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date', 'after_or_equal:from'],
+        ]);
+
+        $limit = min((int) $request->input('limit', 15), 100);
+
+        $query = Prescription::with(['doctor.user', 'patient.user']);
+
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+
+        if (! empty($validated['doctor_id'])) {
+            $query->where('doctor_id', $validated['doctor_id']);
+        }
+
+        if (! empty($validated['patient_id'])) {
+            $query->where('patient_id', $validated['patient_id']);
+        }
+
+        if (! empty($validated['from'])) {
+            $query->whereDate('created_at', '>=', $validated['from']);
+        }
+
+        if (! empty($validated['to'])) {
+            $query->whereDate('created_at', '<=', $validated['to']);
+        }
+
+        $prescriptions = $query->orderByDesc('created_at')->paginate($limit);
+
+        return PrescriptionResource::collection($prescriptions)->response();
+    }
+
+    /**
      * List doctor's prescriptions.
      *
      * GET /api/prescriptions
@@ -66,7 +111,7 @@ class PrescriptionController extends Controller
             $query->whereDate('created_at', '<=', $validated['to']);
         }
 
-        $prescriptions = $query->orderByDesc('created_at')->paginate($limit);
+        $prescriptions = $query->orderBy('created_at', $validated['order'] ?? 'desc')->paginate($limit);
 
         return PrescriptionResource::collection($prescriptions)->response();
     }

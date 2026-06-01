@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Prescriptions;
+namespace App\Http\Requests\Users;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class PrescriptionFilterRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +22,10 @@ class PrescriptionFilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['nullable', 'in:pending,consumed'],
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date', 'after_or_equal:from'],
-            'order' => ['nullable', 'in:asc,desc'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+            'role' => ['required', 'in:admin,doctor,patient'],
         ];
     }
 }

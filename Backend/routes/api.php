@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\AdminMetricController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,7 +18,7 @@ Route::get('/', function () {
     return response()->json(['status' => 'ok']);
 });
 
-Route::prefix('auth')->group(function () {
+Route::prefix('auth')->middleware('throttle:60,1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile', [AuthController::class, 'profile']);
@@ -30,6 +32,10 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     });
 
     Route::get('/admin/metrics', [AdminMetricController::class, 'index']);
+    Route::get('/admin/prescriptions', [PrescriptionController::class, 'adminIndex']);
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::get('/doctors', [DoctorController::class, 'index']);
 });
 
 Route::middleware(['auth:sanctum', 'role:admin|doctor'])->group(function () {
