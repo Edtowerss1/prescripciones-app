@@ -21,6 +21,13 @@
 /storage/*.key
 /storage/pail
 /vendor
+
+# AI agent traceability (kept locally, not in public repo)
+/AGENTS.md
+/.agents/
+/.atl/
+/openspec/
+/docs/backend-batches.md
 _ide_helper.php
 Homestead.json
 Homestead.yaml
