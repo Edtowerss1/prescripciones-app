@@ -96,7 +96,7 @@ Units 3, 5, 6, 7 exceed 400 lines each. If strict <400 slicing is enforced, they
 - [x] 6.1 Create `frontend/src/api/doctors.api.ts` list(query) *(completed in Phase 4)*
 - [x] 6.2 Create `frontend/src/api/admin.api.ts` metrics(), prescriptions()
 - [x] 6.3 Create `frontend/src/stores/admin.store.ts` metrics + presc list + filters
-- [ ] 6.4-6.6 Create PrescriptionsByStatusChart, PrescriptionsByDayChart, TopDoctorsChart in `frontend/src/components/charts/`
+- [x] 6.4-6.6 Create PrescriptionsByStatusChart, PrescriptionsByDayChart, TopDoctorsChart in `frontend/src/components/charts/`
 - [ ] 6.7 Create `frontend/src/views/admin/AdminDashboardView.vue` metric cards + 3 charts
 - [ ] 6.8 Create `frontend/src/views/admin/AdminPrescriptionsView.vue` global table + filters
 
