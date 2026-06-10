@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Props { variant?: 'primary' | 'secondary' | 'danger' | 'ghost'; loading?: boolean; disabled?: boolean; type?: 'button' | 'submit' }
-const props = withDefaults(defineProps<Props>(), { variant: 'primary', loading: false, disabled: false, type: 'button' })
+withDefaults(defineProps<Props>(), { variant: 'primary', loading: false, disabled: false, type: 'button' })
 const emit = defineEmits<{ click: [event: MouseEvent] }>()
 const variants: Record<string, string> = {
   primary: 'bg-indigo-600 text-white hover:bg-indigo-500 focus:ring-indigo-500',

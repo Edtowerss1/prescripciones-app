@@ -7,7 +7,6 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import PrescriptionStatusBadge from '@/components/prescriptions/PrescriptionStatusBadge.vue'
 import { usePrescriptionsStore } from '@/stores/prescriptions.store'
 import { useToast } from '@/composables/useToast'
-import type { PrescriptionItem } from '@/types/prescription'
 
 const route = useRoute()
 const router = useRouter()

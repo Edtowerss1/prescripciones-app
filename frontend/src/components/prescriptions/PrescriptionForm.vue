@@ -25,7 +25,7 @@ interface Props {
   errors?: Record<string, string>
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   loading: false,
   errors: () => ({}),
 })

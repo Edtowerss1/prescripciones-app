@@ -7,7 +7,7 @@ const { toasts, removeToast } = useToast()
 <template>
   <div class="pointer-events-none fixed right-4 top-4 z-[100] flex w-full max-w-sm flex-col gap-2 sm:left-auto sm:w-auto">
     <TransitionGroup name="toast">
-      <BaseToast v-for="t in toasts" :key="t.id" :message="t.message" :type="t.type" :id="t.id" @dismiss="removeToast" />
+      <BaseToast v-for="t in toasts" :key="t.id" :message="t.message" :type="t.type" :id="t.id" @dismiss="(id: string | number) => removeToast(Number(id))" />
     </TransitionGroup>
   </div>
 </template>

@@ -10,7 +10,6 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import PrescriptionStatusBadge from '@/components/prescriptions/PrescriptionStatusBadge.vue'
 import { useAdminStore } from '@/stores/admin.store'
 import { usePagination } from '@/composables/usePagination'
-import { useToast } from '@/composables/useToast'
 import * as doctorsApi from '@/api/doctors.api'
 import * as patientsApi from '@/api/patients.api'
 import type { Prescription } from '@/types/prescription'
@@ -19,7 +18,6 @@ import type { Patient } from '@/types/patient'
 
 const router = useRouter()
 const store = useAdminStore()
-const { addToast } = useToast()
 const pagination = usePagination()
 
 const initialLoadDone = ref(false)

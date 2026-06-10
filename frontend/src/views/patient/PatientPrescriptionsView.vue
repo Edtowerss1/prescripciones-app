@@ -17,7 +17,7 @@ const router = useRouter()
 const store = usePrescriptionsStore()
 const { addToast } = useToast()
 const pagination = usePagination()
-const { status: filterStatus, buildQueryParams, clearFilters } = useFilters()
+const { status: filterStatus, buildQueryParams } = useFilters()
 
 const statusOptions = [
   { value: '', label: 'All Statuses' },

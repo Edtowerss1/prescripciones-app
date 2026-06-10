@@ -69,7 +69,7 @@ async function handleSubmit(data: {
     if (err?.validationErrors) {
       const mapped: Record<string, string> = {}
       for (const [key, msgs] of Object.entries(err.validationErrors)) {
-        mapped[key] = (msgs as string[])[0]
+        mapped[key] = (msgs as string[])[0] ?? ''
       }
       fieldErrors.value = mapped
     } else {

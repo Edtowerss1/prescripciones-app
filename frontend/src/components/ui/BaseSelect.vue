@@ -1,7 +1,7 @@
 <script setup lang="ts">
 interface Option { value: string | number; label: string }
 interface Props { modelValue: string | number; label?: string; options: Option[]; placeholder?: string; error?: string | null; disabled?: boolean }
-const props = withDefaults(defineProps<Props>(), { placeholder: 'Select...', error: null, disabled: false })
+withDefaults(defineProps<Props>(), { placeholder: 'Select...', error: null, disabled: false })
 const emit = defineEmits<{ 'update:modelValue': [value: string | number] }>()
 </script>
 
