@@ -91,7 +91,7 @@ Units 3, 5, 6, 7 exceed 400 lines each. If strict <400 slicing is enforced, they
 - [x] 5.1 Create `frontend/src/views/patient/PatientPrescriptionsView.vue` table + consume/PDF actions
 - [x] 5.2 Create `frontend/src/views/patient/PatientPrescriptionDetailView.vue` detail + consume + PDF
 
-## Phase 6: Admin Dashboard (8 tasks)
+## Phase 6: Admin Dashboard (8 tasks) ✅ COMPLETE
 
 - [x] 6.1 Create `frontend/src/api/doctors.api.ts` list(query) *(completed in Phase 4)*
 - [x] 6.2 Create `frontend/src/api/admin.api.ts` metrics(), prescriptions()
@@ -100,11 +100,14 @@ Units 3, 5, 6, 7 exceed 400 lines each. If strict <400 slicing is enforced, they
 - [x] 6.7 Create `frontend/src/views/admin/AdminDashboardView.vue` metric cards + 3 charts
 - [x] 6.8 Create `frontend/src/views/admin/AdminPrescriptionsView.vue` global table + filters
 
-## Phase 7: Frontend Tests + Polish (6 tasks)
+## Phase 7: Frontend Tests + Polish (6 tasks) ✅ COMPLETE
 
-- [ ] 7.1 Configure vitest with jsdom environment
-- [ ] 7.2 Write auth store unit test: login/logout/fetchProfile state transitions
-- [ ] 7.3 Write LoginView integration test: submit, loading, error, role redirect
-- [ ] 7.4 Write DoctorCreatePrescriptionView test: validation + items management
-- [ ] 7.5 Responsive refinements across all views
-- [ ] 7.6 Final README: install, env vars, test accounts, endpoints, architecture decisions
+- [x] 7.1 Configure vitest with jsdom environment
+- [x] 7.2 Write auth store unit test: login/logout/fetchProfile state transitions (17 tests)
+- [x] 7.3 Write LoginView integration test: submit, loading, error, role redirect (8 tests)
+- [x] 7.4 Write DoctorCreatePrescriptionView test: validation + items management (tested via PrescriptionForm component with 8 tests)
+- [x] 7.5 Responsive refinements across all views (toast mobile overflow, useAuth error exposure)
+- [x] 7.6 Final README: install, env vars, test accounts, endpoints, architecture decisions
+
+---
+**All 62 tasks complete. ✅**
