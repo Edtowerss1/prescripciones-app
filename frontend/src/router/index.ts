@@ -51,6 +51,12 @@ const router = createRouter({
       meta: { requiresAuth: true, allowedRoles: ['admin'] },
     },
     {
+      path: '/admin/prescriptions/:id',
+      name: 'admin-prescription-detail',
+      component: () => import('@/views/doctor/DoctorPrescriptionDetailView.vue'),
+      meta: { requiresAuth: true, allowedRoles: ['admin'] },
+    },
+    {
       path: '/:catchAll(.*)',
       name: 'not-found',
       redirect: '/login',
