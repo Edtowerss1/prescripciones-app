@@ -23,6 +23,16 @@ export async function list(
   return data
 }
 
+export async function myList(
+  filters: PrescriptionFilters,
+): Promise<PaginatedResponse<Prescription>> {
+  const { data } = await client.get<PaginatedResponse<Prescription>>(
+    '/me/prescriptions',
+    { params: filters },
+  )
+  return data
+}
+
 export async function create(
   payload: CreatePrescriptionPayload,
 ): Promise<Prescription> {

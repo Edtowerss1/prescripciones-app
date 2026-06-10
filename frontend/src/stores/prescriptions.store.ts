@@ -33,6 +33,28 @@ export const usePrescriptionsStore = defineStore('prescriptions', () => {
     }
   }
 
+  async function fetchMyPrescriptions(
+    filters: prescriptionsApi.PrescriptionFilters = {},
+  ) {
+    isLoading.value = true
+    error.value = null
+    try {
+      const res = await prescriptionsApi.myList(filters)
+      list.value = res.data
+      pagination.value = res.meta
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to load prescriptions.'
+      error.value = msg
+      list.value = []
+      pagination.value = null
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function createPrescription(
     payload: CreatePrescriptionPayload,
   ): Promise<Prescription> {
@@ -74,6 +96,25 @@ export const usePrescriptionsStore = defineStore('prescriptions', () => {
     }
   }
 
+  async function consumePrescription(id: number): Promise<Prescription> {
+    error.value = null
+    try {
+      const prescription = await prescriptionsApi.consume(id)
+      // Update current detail if it matches
+      if (current.value?.id === id) {
+        current.value = prescription
+      }
+      return prescription
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to consume prescription.'
+      error.value = msg
+      throw err
+    }
+  }
+
   async function downloadPdf(id: number): Promise<void> {
     try {
       const blob = await prescriptionsApi.pdf(id)
@@ -102,8 +143,10 @@ export const usePrescriptionsStore = defineStore('prescriptions', () => {
     error,
     pagination,
     fetchPrescriptions,
+    fetchMyPrescriptions,
     createPrescription,
     fetchPrescription,
+    consumePrescription,
     downloadPdf,
   }
 })

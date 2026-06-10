@@ -10,9 +10,9 @@
 | Delivery strategy | ask-on-risk |
 | Chain strategy | pending |
 
-Decision needed before apply: Yes
+Decision needed before apply: Yes (resolved: feature-branch-chain)
 Chained PRs recommended: Yes
-Chain strategy: pending
+Chain strategy: feature-branch-chain
 400-line budget risk: High
 
 ### Suggested Work Units
@@ -72,24 +72,24 @@ Units 3, 5, 6, 7 exceed 400 lines each. If strict <400 slicing is enforced, they
 - [x] 3.1-3.9 Create BaseButton, BaseInput, BaseSelect, BaseTable, BaseModal, BaseToast, ToastContainer, EmptyState, LoadingSpinner in `frontend/src/components/ui/`
 - [x] 3.10 Create `frontend/src/components/prescriptions/PrescriptionStatusBadge.vue` pending→amber, consumed→green
 
-## Phase 4: Doctor Workflow (11 tasks)
+## Phase 4: Doctor Workflow (11 tasks) ✅ COMPLETE
 
-- [ ] 4.1 Create `frontend/src/api/patients.api.ts` list(query)
-- [ ] 4.2 Create `frontend/src/api/prescriptions.api.ts` list/create/show/consume/pdf
-- [ ] 4.3 Create `frontend/src/stores/prescriptions.store.ts` list, detail, filters, pagination, actions
-- [ ] 4.4 Create `frontend/src/composables/usePagination.ts` page state, meta.* parsing
-- [ ] 4.5 Create `frontend/src/composables/useFilters.ts` reactive filter, reset(), toQueryParams()
-- [ ] 4.6 Create `frontend/src/components/prescriptions/PrescriptionForm.vue` patient selector + notes + items
-- [ ] 4.7 Create `frontend/src/components/prescriptions/PrescriptionItemsForm.vue` add/remove items
-- [ ] 4.8 Create `frontend/src/components/prescriptions/PrescriptionTable.vue` BaseTable wrapper
-- [ ] 4.9 Create `frontend/src/views/doctor/DoctorPrescriptionsView.vue` table + filters + create button
-- [ ] 4.10 Create `frontend/src/views/doctor/DoctorCreatePrescriptionView.vue` form orchestrator
-- [ ] 4.11 Create `frontend/src/views/doctor/DoctorPrescriptionDetailView.vue` detail + PDF download
+- [x] 4.1 Create `frontend/src/api/patients.api.ts` list(query)
+- [x] 4.2 Create `frontend/src/api/prescriptions.api.ts` list/create/show/consume/pdf
+- [x] 4.3 Create `frontend/src/api/doctors.api.ts` list(query)
+- [x] 4.4 Create `frontend/src/stores/prescriptions.store.ts` list, detail, filters, pagination, actions
+- [x] 4.5 Create `frontend/src/composables/usePagination.ts` page state, meta.* parsing
+- [x] 4.6 Create `frontend/src/composables/useFilters.ts` reactive filter, reset(), toQueryParams()
+- [x] 4.7 Create `frontend/src/components/prescriptions/PrescriptionForm.vue` patient selector + notes + items
+- [x] 4.8 Create `frontend/src/components/prescriptions/PrescriptionItemsForm.vue` add/remove items
+- [x] 4.9 Create `frontend/src/components/prescriptions/PrescriptionTable.vue` BaseTable wrapper
+- [x] 4.10 Create `frontend/src/views/doctor/DoctorPrescriptionsView.vue` table + filters + create button
+- [x] 4.11 Create `frontend/src/views/doctor/DoctorCreatePrescriptionView.vue` + DoctorPrescriptionDetailView.vue + router verify
 
-## Phase 5: Patient Workflow (2 tasks)
+## Phase 5: Patient Workflow (2 tasks) ✅ COMPLETE
 
-- [ ] 5.1 Create `frontend/src/views/patient/PatientPrescriptionsView.vue` table + consume/PDF actions
-- [ ] 5.2 Create `frontend/src/views/patient/PatientPrescriptionDetailView.vue` detail + consume + PDF
+- [x] 5.1 Create `frontend/src/views/patient/PatientPrescriptionsView.vue` table + consume/PDF actions
+- [x] 5.2 Create `frontend/src/views/patient/PatientPrescriptionDetailView.vue` detail + consume + PDF
 
 ## Phase 6: Admin Dashboard (8 tasks)
 
