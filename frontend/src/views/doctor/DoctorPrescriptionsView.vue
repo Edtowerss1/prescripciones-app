@@ -10,13 +10,11 @@ import PrescriptionTable from '@/components/prescriptions/PrescriptionTable.vue'
 import { usePrescriptionsStore } from '@/stores/prescriptions.store'
 import { usePagination } from '@/composables/usePagination'
 import { useFilters } from '@/composables/useFilters'
-import { useToast } from '@/composables/useToast'
 
 const router = useRouter()
 const store = usePrescriptionsStore()
 const pagination = usePagination()
-const filters = useFilters()
-const { addToast } = useToast()
+const { status: filterStatus, from: filterFrom, to: filterTo, search: filterSearch, buildQueryParams } = useFilters()
 
 const statusOptions = [
   { value: '', label: 'All Statuses' },
@@ -28,7 +26,7 @@ const initialLoadDone = ref(false)
 
 async function loadPrescriptions() {
   const params = {
-    ...filters.buildQueryParams(),
+    ...buildQueryParams(),
     page: pagination.page.value,
     limit: pagination.limit.value,
   }
@@ -39,17 +37,14 @@ async function loadPrescriptions() {
   initialLoadDone.value = true
 }
 
-// Reload when filters or page change
-watch(
-  [filters.status, filters.from, filters.to, pagination.page],
-  () => {
-    loadPrescriptions()
-  },
-)
+// Reload when status, from, to, or page changes
+watch([filterStatus, filterFrom, filterTo, pagination.page], () => {
+  loadPrescriptions()
+})
 
 // Debounced search
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
-watch(filters.search, () => {
+watch(filterSearch, () => {
   if (searchTimeout) clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => {
     pagination.goToPage(1)
@@ -86,36 +81,14 @@ function handleRetry() {
 
     <!-- Filters -->
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-4">
-      <BaseInput
-        v-model="filters.search.value"
-        label="Search"
-        placeholder="Search patients..."
-      />
-      <BaseSelect
-        v-model="filters.status.value"
-        label="Status"
-        :options="statusOptions"
-        @update:model-value="filters.status.value = String($event)"
-      />
-      <BaseInput
-        v-model="filters.from.value"
-        label="From"
-        type="date"
-        @update:model-value="filters.from.value = $event"
-      />
-      <BaseInput
-        v-model="filters.to.value"
-        label="To"
-        type="date"
-        @update:model-value="filters.to.value = $event"
-      />
+      <BaseInput v-model="filterSearch" label="Search" placeholder="Search patients..." />
+      <BaseSelect v-model="filterStatus" label="Status" :options="statusOptions" />
+      <BaseInput v-model="filterFrom" label="From" type="date" />
+      <BaseInput v-model="filterTo" label="To" type="date" />
     </div>
 
     <!-- Loading State -->
-    <div
-      v-if="store.isLoading && !initialLoadDone"
-      class="py-12"
-    >
+    <div v-if="store.isLoading && !initialLoadDone" class="py-12">
       <LoadingSpinner size="lg" label="Loading prescriptions..." />
     </div>
 
@@ -146,10 +119,7 @@ function handleRetry() {
       >
         <template #actions="{ prescription }">
           <div class="flex items-center gap-2">
-            <BaseButton
-              variant="ghost"
-              @click="viewDetail(prescription.id)"
-            >
+            <BaseButton variant="ghost" @click="viewDetail(prescription.id)">
               View
             </BaseButton>
           </div>
