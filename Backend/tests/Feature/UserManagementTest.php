@@ -94,6 +94,28 @@ test('user list rejects unauthenticated request', function () {
         ->assertJsonStructure(['message', 'code', 'details']);
 });
 
+test('user list invalid role returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test-token')->plainTextToken;
+
+    $response = $this->withToken($token)->getJson('/api/users?role=supervisor');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});
+
+test('user list query too long returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test-token')->plainTextToken;
+
+    $response = $this->withToken($token)->getJson('/api/users?query='.str_repeat('a', 256));
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});
+
 // --------------------------------------------------------------------
 // Create User — POST /api/users
 // --------------------------------------------------------------------

@@ -143,3 +143,63 @@ test('unauthenticated gets 401 on admin prescriptions', function () {
     $response->assertUnauthorized()
         ->assertJsonStructure(['message', 'code', 'details']);
 });
+
+test('admin prescriptions invalid status returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test')->plainTextToken;
+
+    $response = $this->withToken($token)
+        ->getJson('/api/admin/prescriptions?status=invalid_status');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});
+
+test('admin prescriptions invalid page returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test')->plainTextToken;
+
+    $response = $this->withToken($token)
+        ->getJson('/api/admin/prescriptions?page=-1');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});
+
+test('admin prescriptions limit over max returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test')->plainTextToken;
+
+    $response = $this->withToken($token)
+        ->getJson('/api/admin/prescriptions?limit=200');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});
+
+test('admin prescriptions invalid date range returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test')->plainTextToken;
+
+    $response = $this->withToken($token)
+        ->getJson('/api/admin/prescriptions?from=not-a-date');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});
+
+test('admin prescriptions from after to returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test')->plainTextToken;
+
+    $response = $this->withToken($token)
+        ->getJson('/api/admin/prescriptions?from=2026-06-01&to=2026-01-01');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});

@@ -58,7 +58,7 @@ test('patient owner can download prescription as PDF', function () {
     $response->assertHeader('Content-Type', 'application/pdf');
 });
 
-test('non-owner doctor receives 404 when downloading PDF', function () {
+test('non-owner doctor receives 403 when downloading PDF', function () {
     $doctorAUser = User::factory()->doctor()->create();
     $doctorA = Doctor::factory()->create(['user_id' => $doctorAUser->id]);
     $doctorBUser = User::factory()->doctor()->create();
@@ -76,7 +76,7 @@ test('non-owner doctor receives 404 when downloading PDF', function () {
     $response = $this->withToken($token)
         ->get("/api/prescriptions/{$prescription->id}/pdf");
 
-    $response->assertNotFound();
+    $response->assertForbidden();
 });
 
 test('non-existent prescription returns 404 when downloading PDF', function () {

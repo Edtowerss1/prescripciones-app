@@ -83,6 +83,8 @@ export const usePrescriptionsStore = defineStore('prescriptions', () => {
     } catch (err: any) {
       if (err?.response?.status === 404) {
         error.value = 'Prescription not found.'
+      } else if (err?.response?.status === 403) {
+        error.value = 'Access denied.'
       } else {
         error.value =
           err?.response?.data?.message ||

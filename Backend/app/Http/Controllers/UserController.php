@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Users\StoreUserRequest;
+use App\Http\Requests\Users\UserFilterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -16,14 +16,15 @@ class UserController extends Controller
      *
      * GET /api/users
      */
-    public function index(Request $request): JsonResponse
+    public function index(UserFilterRequest $request): JsonResponse
     {
-        $limit = min((int) $request->input('limit', 15), 100);
+        $validated = $request->validated();
+        $limit = min((int) ($validated['limit'] ?? 15), 100);
 
         $users = User::with('doctor', 'patient')
-            ->when($request->filled('role'), fn ($q) => $q->role($request->query('role'), 'api'))
-            ->when($request->filled('query'), function ($q) use ($request) {
-                $search = '%'.$request->query('query').'%';
+            ->when(! empty($validated['role']), fn ($q) => $q->role($validated['role'], 'api'))
+            ->when(! empty($validated['query']), function ($q) use ($validated) {
+                $search = '%'.$validated['query'].'%';
                 $q->where(function ($sub) use ($search) {
                     $sub->where('name', 'like', $search)
                         ->orWhere('email', 'like', $search);

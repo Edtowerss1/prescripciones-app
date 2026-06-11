@@ -37,12 +37,12 @@ Monolithic Laravel backend serving a JSON API consumed by a Vue 3 SPA frontend.
 | Chart data flow | Parent fetches, passes props | Charts stay pure presentational |
 | Scaffold | Manual Vite setup | Full control, no generated cleanup |
 | PDF download | Axios blob + ObjectURL | Must send Bearer token |
+| Role model | Spatie Permission (`spatie/laravel-permission`) | RBAC via `HasRoles` trait; no `users.role` column — intentional design decision |
 
 ## Backend
 
 See `Backend/` directory. Laravel application with:
 
-- **127 tests / 582 assertions** (Pest)
 - Sanctum token authentication
 - Role-based access control (admin, doctor, patient)
 - Prescription CRUD with PDF generation
@@ -55,6 +55,29 @@ php artisan key:generate
 php artisan migrate --seed
 php artisan serve
 ```
+
+### API Endpoints
+
+| Method | Endpoint | Auth | Roles | Description |
+|--------|----------|------|-------|-------------|
+| `GET` | `/api` | — | Public | Health check |
+| `POST` | `/api/auth/login` | Throttle (60/min) | Public | Login, returns token + user |
+| `GET` | `/api/auth/profile` | `auth:sanctum` | All | Authenticated user profile |
+| `POST` | `/api/auth/logout` | `auth:sanctum` | All | Revoke current token |
+| `GET` | `/api/admin/metrics` | `auth:sanctum` + `role:admin` | Admin | Dashboard metrics |
+| `GET` | `/api/admin/prescriptions` | `auth:sanctum` + `role:admin` | Admin | List all prescriptions |
+| `GET` | `/api/users` | `auth:sanctum` + `role:admin` | Admin | List users |
+| `POST` | `/api/users` | `auth:sanctum` + `role:admin` | Admin | Create user |
+| `GET` | `/api/doctors` | `auth:sanctum` + `role:admin` | Admin | List doctors |
+| `GET` | `/api/patients` | `auth:sanctum` + `role:admin\|doctor` | Admin, Doctor | List patients |
+| `POST` | `/api/prescriptions` | `auth:sanctum` + `role:doctor` | Doctor | Create prescription |
+| `GET` | `/api/prescriptions` | `auth:sanctum` + `role:doctor` | Doctor | List own prescriptions |
+| `GET` | `/api/prescriptions/{id}` | `auth:sanctum` | Policy-gated | Prescription detail |
+| `GET` | `/api/prescriptions/{id}/pdf` | `auth:sanctum` | Policy-gated | Download PDF |
+| `PUT` | `/api/prescriptions/{id}/consume` | `auth:sanctum` | Policy-gated | Mark as consumed |
+| `GET` | `/api/me/prescriptions` | `auth:sanctum` + `role:patient` | Patient | List own prescriptions |
+
+> **Deployment:** URL and base domain are pending deployment — update `VITE_API_BASE_URL` and the backend base URL when a server is provisioned.
 
 ## Frontend
 
@@ -118,9 +141,9 @@ After seeding the database (`php artisan db:seed`):
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | `admin@test.com` | `password` |
-| Doctor | `dr@test.com` | `password` |
-| Patient | `patient@test.com` | `password` |
+| Admin | `admin@test.com` | `admin123` |
+| Doctor | `dr@test.com` | `dr123` |
+| Patient | `patient@test.com` | `patient123` |
 
 ### Tech Stack
 

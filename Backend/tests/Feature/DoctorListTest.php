@@ -102,3 +102,25 @@ test('doctor list returns empty result set for non-matching query', function () 
     $response->assertOk()
         ->assertJsonCount(0, 'data');
 });
+
+test('doctor list invalid page returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test-token')->plainTextToken;
+
+    $response = $this->withToken($token)->getJson('/api/doctors?page=-1');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});
+
+test('doctor list limit over max returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test-token')->plainTextToken;
+
+    $response = $this->withToken($token)->getJson('/api/doctors?limit=101');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});

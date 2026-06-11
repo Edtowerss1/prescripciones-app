@@ -130,7 +130,7 @@ test('patient can consume pending prescription', function () {
     expect($prescription->consumed_at)->not->toBeNull();
 });
 
-test('non-owner doctor receives 404 on prescription detail', function () {
+test('non-owner doctor receives 403 on prescription detail', function () {
     $doctorAUser = User::factory()->doctor()->create();
     $doctorA = Doctor::factory()->create(['user_id' => $doctorAUser->id]);
     $doctorBUser = User::factory()->doctor()->create();
@@ -148,5 +148,5 @@ test('non-owner doctor receives 404 on prescription detail', function () {
     $response = $this->withToken($token)
         ->getJson("/api/prescriptions/{$prescription->id}");
 
-    $response->assertNotFound();
+    $response->assertForbidden();
 });

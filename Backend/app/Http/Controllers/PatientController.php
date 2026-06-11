@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Patient\PatientFilterRequest;
 use App\Http\Resources\PatientResource;
 use App\Models\Patient;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class PatientController extends Controller
 {
@@ -14,12 +14,13 @@ class PatientController extends Controller
      *
      * GET /api/patients
      */
-    public function index(Request $request): JsonResponse
+    public function index(PatientFilterRequest $request): JsonResponse
     {
-        $limit = min((int) $request->input('limit', 15), 100);
+        $validated = $request->validated();
+        $limit = min((int) ($validated['limit'] ?? 15), 100);
 
         $patients = Patient::with('user')
-            ->when($request->filled('query'), fn ($q) => $q->whereHas('user', fn ($uq) => $uq->where('name', 'like', '%'.$request->query('query').'%')
+            ->when(! empty($validated['query']), fn ($q) => $q->whereHas('user', fn ($uq) => $uq->where('name', 'like', '%'.$validated['query'].'%')
             )
             )
             ->orderByDesc('created_at')

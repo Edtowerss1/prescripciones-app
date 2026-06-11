@@ -40,10 +40,10 @@ test('patient_cannot_access_doctor_prescription_list_returns_403', function () {
 });
 
 // --------------------------------------------------------------------
-// Detail — non-owners receive 404
+// Detail / Consume — non-owners receive 403
 // --------------------------------------------------------------------
 
-test('non_owner_doctor_cannot_view_prescription_detail_returns_404', function () {
+test('non_owner_doctor_cannot_view_prescription_detail_returns_403', function () {
     $doctorAUser = User::factory()->doctor()->create();
     $doctorA = Doctor::factory()->create(['user_id' => $doctorAUser->id]);
     $doctorBUser = User::factory()->doctor()->create();
@@ -61,11 +61,11 @@ test('non_owner_doctor_cannot_view_prescription_detail_returns_404', function ()
     $response = $this->withToken($token)
         ->getJson("/api/prescriptions/{$prescription->id}");
 
-    $response->assertNotFound()
+    $response->assertForbidden()
         ->assertJsonStructure(['message', 'code', 'details']);
 });
 
-test('non_owner_patient_cannot_consume_prescription_returns_404', function () {
+test('non_owner_patient_cannot_consume_prescription_returns_403', function () {
     $doctorUser = User::factory()->doctor()->create();
     $doctor = Doctor::factory()->create(['user_id' => $doctorUser->id]);
     $patientAUser = User::factory()->patient()->create();
@@ -83,7 +83,7 @@ test('non_owner_patient_cannot_consume_prescription_returns_404', function () {
     $response = $this->withToken($token)
         ->putJson("/api/prescriptions/{$prescription->id}/consume");
 
-    $response->assertNotFound()
+    $response->assertForbidden()
         ->assertJsonStructure(['message', 'code', 'details']);
 });
 

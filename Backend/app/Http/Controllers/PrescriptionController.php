@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Prescriptions\AdminPrescriptionFilterRequest;
 use App\Http\Requests\Prescriptions\ConsumePrescriptionRequest;
 use App\Http\Requests\Prescriptions\PrescriptionFilterRequest;
 use App\Http\Requests\Prescriptions\StorePrescriptionRequest;
@@ -10,9 +11,9 @@ use App\Models\Patient;
 use App\Models\Prescription;
 use App\Services\PdfService;
 use App\Services\PrescriptionService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 
@@ -47,17 +48,11 @@ class PrescriptionController extends Controller
      *
      * GET /api/admin/prescriptions
      */
-    public function adminIndex(Request $request): JsonResponse
+    public function adminIndex(AdminPrescriptionFilterRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'status' => ['nullable', 'in:pending,consumed'],
-            'doctor_id' => ['nullable', 'integer', 'exists:doctors,id'],
-            'patient_id' => ['nullable', 'integer', 'exists:patients,id'],
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date', 'after_or_equal:from'],
-        ]);
+        $validated = $request->validated();
 
-        $limit = min((int) $request->input('limit', 15), 100);
+        $limit = min((int) ($validated['limit'] ?? 15), 100);
 
         $query = Prescription::with(['doctor.user', 'patient.user']);
 
@@ -124,7 +119,7 @@ class PrescriptionController extends Controller
     public function show(Prescription $prescription): JsonResponse
     {
         if (! Gate::allows('view', $prescription)) {
-            abort(404);
+            throw new AuthorizationException;
         }
 
         return (new PrescriptionResource(
@@ -140,7 +135,7 @@ class PrescriptionController extends Controller
     public function pdf(Prescription $prescription, PdfService $pdfService): Response
     {
         if (! Gate::allows('view', $prescription)) {
-            abort(404);
+            throw new AuthorizationException;
         }
 
         return $pdfService->generatePrescriptionPdf($prescription);
@@ -154,7 +149,7 @@ class PrescriptionController extends Controller
     public function consume(ConsumePrescriptionRequest $request, Prescription $prescription, PrescriptionService $svc): JsonResponse
     {
         if (! Gate::allows('consume', $prescription)) {
-            abort(404);
+            throw new AuthorizationException;
         }
 
         $prescription = $svc->consumePrescription($prescription);

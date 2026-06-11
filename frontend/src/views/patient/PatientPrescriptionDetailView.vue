@@ -15,6 +15,7 @@ const { addToast } = useToast()
 
 const id = Number(route.params.id)
 const notFound = ref(false)
+const accessDenied = ref(false)
 
 const itemColumns = [
   { key: 'name', label: 'Name' },
@@ -24,12 +25,15 @@ const itemColumns = [
 ]
 
 async function loadPrescription() {
+  accessDenied.value = false
   notFound.value = false
   try {
     await store.fetchPrescription(id)
   } catch (err: any) {
     if (err?.response?.status === 404) {
       notFound.value = true
+    } else if (err?.response?.status === 403) {
+      accessDenied.value = true
     }
   }
 }
@@ -46,6 +50,9 @@ async function handleConsume() {
     } else if (err?.response?.status === 404) {
       addToast('Prescription not found.', 'error')
       notFound.value = true
+    } else if (err?.response?.status === 403) {
+      addToast('Access denied.', 'error')
+      accessDenied.value = true
     } else {
       addToast('Failed to consume prescription.', 'error')
     }
@@ -82,11 +89,11 @@ onMounted(() => {
     </div>
 
     <!-- Loading State -->
-    <div v-if="store.isLoading && !notFound" class="py-12">
+    <div v-if="store.isLoading" class="py-12">
       <LoadingSpinner size="lg" label="Loading prescription..." />
     </div>
 
-    <!-- Not Found / Unauthorized State -->
+    <!-- Not Found State -->
     <div
       v-else-if="notFound"
       class="rounded-lg border border-yellow-200 bg-yellow-50 p-8 text-center"
@@ -95,14 +102,30 @@ onMounted(() => {
         Prescription not found
       </p>
       <p class="mb-4 text-sm text-yellow-600">
-        This prescription may not exist or you may not have access to it.
+        This prescription does not exist.
       </p>
       <BaseButton @click="goBack">
         Back to Prescriptions
       </BaseButton>
     </div>
 
-    <!-- Error State (non-404) -->
+    <!-- Access Denied State -->
+    <div
+      v-else-if="accessDenied"
+      class="rounded-lg border border-red-200 bg-red-50 p-8 text-center"
+    >
+      <p class="mb-2 text-lg font-medium text-red-800">
+        Access denied
+      </p>
+      <p class="mb-4 text-sm text-red-600">
+        You do not have permission to view this prescription.
+      </p>
+      <BaseButton @click="goBack">
+        Back to Prescriptions
+      </BaseButton>
+    </div>
+
+    <!-- Error State (non-404, non-403) -->
     <div
       v-else-if="store.error && !store.current"
       class="rounded-lg border border-red-200 bg-red-50 p-8 text-center"

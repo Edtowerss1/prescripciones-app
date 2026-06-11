@@ -118,3 +118,25 @@ test('patient search respects pagination limit', function () {
     $response->assertOk();
     expect(count($response->json('data')))->toBeLessThanOrEqual(2);
 });
+
+test('patient search limit over max returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test-token')->plainTextToken;
+
+    $response = $this->withToken($token)->getJson('/api/patients?limit=200');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});
+
+test('patient search invalid page returns 422', function () {
+    $admin = User::factory()->admin()->create();
+    $token = $admin->createToken('test-token')->plainTextToken;
+
+    $response = $this->withToken($token)->getJson('/api/patients?page=-1');
+
+    $response->assertUnprocessable()
+        ->assertJsonStructure(['message', 'code', 'details'])
+        ->assertJsonPath('code', 'VALIDATION_ERROR');
+});

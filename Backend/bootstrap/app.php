@@ -11,6 +11,7 @@ use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -40,6 +41,17 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (AuthorizationException $e) {
+            return response()->json([
+                'message' => $e->getMessage() ?: 'Forbidden',
+                'code' => 'FORBIDDEN',
+                'details' => (object) [],
+            ], 403);
+        });
+
+        // Laravel converts AuthorizationException to AccessDeniedHttpException
+        // internally before render callbacks are checked, so this handler
+        // ensures the consistent JSON envelope is always applied.
+        $exceptions->render(function (AccessDeniedHttpException $e) {
             return response()->json([
                 'message' => $e->getMessage() ?: 'Forbidden',
                 'code' => 'FORBIDDEN',
