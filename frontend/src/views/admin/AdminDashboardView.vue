@@ -43,27 +43,27 @@ onMounted(loadMetrics)
 
 <template>
   <div>
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-6 flex items-center justify-between">
       <h1 class="text-2xl font-semibold text-gray-900">
         Admin Dashboard
       </h1>
+    </div>
 
-      <!-- Date range filters -->
-      <div class="flex items-end gap-3">
-        <BaseInput
-          v-model="fromFilter"
-          label="From"
-          type="date"
-        />
-        <BaseInput
-          v-model="toFilter"
-          label="To"
-          type="date"
-        />
-        <BaseButton @click="handleFilter">
-          Apply
-        </BaseButton>
-      </div>
+    <!-- Date range filters -->
+    <div class="mb-6 flex items-end gap-3">
+      <BaseInput
+        v-model="fromFilter"
+        label="From"
+        type="date"
+      />
+      <BaseInput
+        v-model="toFilter"
+        label="To"
+        type="date"
+      />
+      <BaseButton @click="handleFilter">
+        Apply
+      </BaseButton>
     </div>
 
     <!-- Loading State -->

@@ -65,7 +65,7 @@ function toggleSidebar() {
     <!-- Main content -->
     <div class="flex flex-1 flex-col overflow-hidden">
       <!-- Top bar -->
-      <header class="flex h-16 items-center justify-between border-b bg-white px-4 lg:px-6">
+      <header class="flex h-16 items-center border-b bg-white px-4 lg:px-6">
         <button
           class="rounded-md p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
           @click="toggleSidebar"
@@ -80,7 +80,7 @@ function toggleSidebar() {
           </svg>
         </button>
 
-        <div class="flex items-center gap-4">
+        <div class="ml-auto flex items-center gap-4">
           <span class="text-sm text-gray-700">{{ user?.name }}</span>
           <button
             class="rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200"
