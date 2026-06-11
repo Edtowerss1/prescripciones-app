@@ -45,12 +45,45 @@ class UserSeeder extends Seeder
         ]);
 
         // Extra doctors for prescription variety
-        $extra1 = User::factory()->create(['name' => 'Dr. García', 'email' => 'dr.garcia@test.com', 'password' => 'dr123']);
-        $extra1->syncRoles('doctor');
-        Doctor::factory()->create(['user_id' => $extra1->id]);
+        $extraDoctors = [
+            ['name' => 'Dr. García', 'email' => 'dr.garcia@test.com', 'specialty' => 'Pediatría'],
+            ['name' => 'Dra. López', 'email' => 'dra.lopez@test.com', 'specialty' => 'Dermatología'],
+            ['name' => 'Dr. Martínez', 'email' => 'dr.martinez@test.com', 'specialty' => 'Traumatología'],
+            ['name' => 'Dra. Rodríguez', 'email' => 'dra.rodriguez@test.com', 'specialty' => 'Neurología'],
+        ];
 
-        $extra2 = User::factory()->create(['name' => 'Dra. López', 'email' => 'dra.lopez@test.com', 'password' => 'dr123']);
-        $extra2->syncRoles('doctor');
-        Doctor::factory()->create(['user_id' => $extra2->id]);
+        foreach ($extraDoctors as $data) {
+            $u = User::factory()->create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => 'dr123',
+            ]);
+            $u->syncRoles('doctor');
+            Doctor::factory()->create([
+                'user_id' => $u->id,
+                'specialty' => $data['specialty'],
+            ]);
+        }
+
+        // Extra patients for prescription variety
+        $extraPatients = [
+            ['name' => 'Carlos Ruiz', 'email' => 'carlos@test.com', 'birth_date' => '1985-03-22'],
+            ['name' => 'María Fernández', 'email' => 'maria@test.com', 'birth_date' => '1992-07-11'],
+            ['name' => 'Lucía Gómez', 'email' => 'lucia@test.com', 'birth_date' => '1978-11-30'],
+            ['name' => 'Pedro Sánchez', 'email' => 'pedro@test.com', 'birth_date' => '2000-01-15'],
+        ];
+
+        foreach ($extraPatients as $data) {
+            $u = User::factory()->create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => 'patient123',
+            ]);
+            $u->syncRoles('patient');
+            Patient::factory()->create([
+                'user_id' => $u->id,
+                'birth_date' => $data['birth_date'],
+            ]);
+        }
     }
 }

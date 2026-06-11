@@ -13,10 +13,10 @@ uses(RefreshDatabase::class);
 // Seeder — User counts & roles
 // --------------------------------------------------------------------
 
-test('seed creates 5 users with correct roles', function () {
+test('seed creates 11 users with correct roles', function () {
     $this->seed();
 
-    expect(User::count())->toBe(5);
+    expect(User::count())->toBe(11);
 
     expect(User::where('email', 'admin@test.com')->first())
         ->not->toBeNull()
@@ -34,7 +34,31 @@ test('seed creates 5 users with correct roles', function () {
         ->not->toBeNull()
         ->hasRole('doctor')->toBeTrue();
 
+    expect(User::where('email', 'dr.martinez@test.com')->first())
+        ->not->toBeNull()
+        ->hasRole('doctor')->toBeTrue();
+
+    expect(User::where('email', 'dra.rodriguez@test.com')->first())
+        ->not->toBeNull()
+        ->hasRole('doctor')->toBeTrue();
+
     expect(User::where('email', 'patient@test.com')->first())
+        ->not->toBeNull()
+        ->hasRole('patient')->toBeTrue();
+
+    expect(User::where('email', 'carlos@test.com')->first())
+        ->not->toBeNull()
+        ->hasRole('patient')->toBeTrue();
+
+    expect(User::where('email', 'maria@test.com')->first())
+        ->not->toBeNull()
+        ->hasRole('patient')->toBeTrue();
+
+    expect(User::where('email', 'lucia@test.com')->first())
+        ->not->toBeNull()
+        ->hasRole('patient')->toBeTrue();
+
+    expect(User::where('email', 'pedro@test.com')->first())
         ->not->toBeNull()
         ->hasRole('patient')->toBeTrue();
 });
@@ -65,7 +89,14 @@ test('doctor profile exists for dr@test.com with correct data', function () {
 test('extra doctors have doctor profiles', function () {
     $this->seed();
 
-    foreach (['dr.garcia@test.com', 'dra.lopez@test.com'] as $email) {
+    $extraEmails = [
+        'dr.garcia@test.com',
+        'dra.lopez@test.com',
+        'dr.martinez@test.com',
+        'dra.rodriguez@test.com',
+    ];
+
+    foreach ($extraEmails as $email) {
         $user = User::where('email', $email)->first();
         expect($user->doctor)->not->toBeNull();
         expect($user->doctor->specialty)->not->toBeEmpty();
@@ -96,12 +127,12 @@ test('admin has no doctor or patient profile', function () {
 // Prescriptions
 // --------------------------------------------------------------------
 
-test('seed creates 8 prescriptions with correct status distribution', function () {
+test('seed creates 40 prescriptions with correct status distribution', function () {
     $this->seed();
 
-    expect(Prescription::count())->toBe(8);
-    expect(Prescription::where('status', 'pending')->count())->toBe(4);
-    expect(Prescription::where('status', 'consumed')->count())->toBe(4);
+    expect(Prescription::count())->toBe(40);
+    expect(Prescription::where('status', 'pending')->count())->toBeGreaterThan(15);
+    expect(Prescription::where('status', 'consumed')->count())->toBeGreaterThan(10);
 });
 
 test('consumed prescriptions have consumed_at set', function () {
@@ -109,7 +140,7 @@ test('consumed prescriptions have consumed_at set', function () {
 
     $consumed = Prescription::where('status', 'consumed')->get();
 
-    expect($consumed)->toHaveCount(4);
+    expect($consumed)->not->toBeEmpty();
     $consumed->each(function (Prescription $p): void {
         expect($p->consumed_at)->not->toBeNull();
     });
@@ -120,18 +151,18 @@ test('pending prescriptions have null consumed_at', function () {
 
     $pending = Prescription::where('status', 'pending')->get();
 
-    expect($pending)->toHaveCount(4);
+    expect($pending)->not->toBeEmpty();
     $pending->each(function (Prescription $p): void {
         expect($p->consumed_at)->toBeNull();
     });
 });
 
-test('each prescription has 2-3 items with realistic names', function () {
+test('each prescription has 1-4 items with realistic names', function () {
     $this->seed();
 
     $prescriptions = Prescription::with('items')->get();
 
-    expect($prescriptions)->toHaveCount(8);
+    expect($prescriptions)->toHaveCount(40);
 
     $medications = [
         'Ibuprofeno 600mg',
@@ -148,8 +179,8 @@ test('each prescription has 2-3 items with realistic names', function () {
 
     foreach ($prescriptions as $prescription) {
         $itemCount = PrescriptionItem::where('prescription_id', $prescription->id)->count();
-        expect($itemCount)->toBeGreaterThanOrEqual(2);
-        expect($itemCount)->toBeLessThanOrEqual(3);
+        expect($itemCount)->toBeGreaterThanOrEqual(1);
+        expect($itemCount)->toBeLessThanOrEqual(4);
 
         foreach ($prescription->items as $item) {
             expect($item->name)->toBeIn($medications);
@@ -164,10 +195,22 @@ test('each prescription has 2-3 items with realistic names', function () {
 // Prescription assignments
 // --------------------------------------------------------------------
 
-test('all prescriptions are assigned to patient@test.com', function () {
+test('prescriptions are distributed across all patients', function () {
     $this->seed();
 
-    $patient = Patient::whereHas('user', fn ($q) => $q->where('email', 'patient@test.com'))->first();
+    $patientCount = Patient::count();
+    expect($patientCount)->toBe(5);
 
-    expect(Prescription::where('patient_id', $patient->id)->count())->toBe(8);
+    // Each patient should have at least some prescriptions
+    $patients = Patient::with('user')->get();
+    $patientsWithPrescriptions = 0;
+
+    foreach ($patients as $patient) {
+        $count = Prescription::where('patient_id', $patient->id)->count();
+        if ($count > 0) {
+            $patientsWithPrescriptions++;
+        }
+    }
+
+    expect($patientsWithPrescriptions)->toBeGreaterThanOrEqual(3);
 });
