@@ -132,9 +132,9 @@ test('admin can create user with doctor role and auto-create doctor profile', fu
     ]);
 
     $response->assertCreated()
-        ->assertJsonStructure(['data' => ['id', 'name', 'email', 'role']])
-        ->assertJsonPath('data.name', 'New Doctor')
-        ->assertJsonPath('data.role', 'doctor');
+        ->assertJsonStructure(['id', 'name', 'email', 'role'])
+        ->assertJsonPath('name', 'New Doctor')
+        ->assertJsonPath('role', 'doctor');
 
     $this->assertDatabaseHas('users', [
         'email' => 'newdoctor@test.com',
@@ -160,7 +160,7 @@ test('admin can create user with patient role and auto-create patient profile', 
     ]);
 
     $response->assertCreated()
-        ->assertJsonPath('data.role', 'patient');
+        ->assertJsonPath('role', 'patient');
 
     $user = User::where('email', 'newpatient@test.com')->first();
     expect($user)->not->toBeNull();
@@ -181,7 +181,7 @@ test('admin can create user with admin role', function () {
     ]);
 
     $response->assertCreated()
-        ->assertJsonPath('data.role', 'admin');
+        ->assertJsonPath('role', 'admin');
 
     $user = User::where('email', 'newadmin@test.com')->first();
     expect($user)->not->toBeNull();

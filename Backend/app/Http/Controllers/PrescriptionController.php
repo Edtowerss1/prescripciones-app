@@ -38,9 +38,12 @@ class PrescriptionController extends Controller
             $request->items,
         );
 
-        return (new PrescriptionResource(
-            $prescription->load(['items', 'doctor.user', 'patient.user'])
-        ))->response()->setStatusCode(201);
+        return response()->json(
+            new PrescriptionResource(
+                $prescription->load(['items', 'doctor.user', 'patient.user'])
+            ),
+            201,
+        );
     }
 
     /**
@@ -122,9 +125,11 @@ class PrescriptionController extends Controller
             throw new AuthorizationException;
         }
 
-        return (new PrescriptionResource(
-            $prescription->load(['items', 'doctor.user', 'patient.user'])
-        ))->response();
+        return response()->json(
+            new PrescriptionResource(
+                $prescription->load(['items', 'doctor.user', 'patient.user'])
+            ),
+        );
     }
 
     /**
@@ -154,7 +159,9 @@ class PrescriptionController extends Controller
 
         $prescription = $svc->consumePrescription($prescription);
 
-        return (new PrescriptionResource($prescription))->response();
+        return response()->json(
+            new PrescriptionResource($prescription),
+        );
     }
 
     /**

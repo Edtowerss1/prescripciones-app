@@ -48,6 +48,9 @@ class UserController extends Controller
         $user->refresh();
         $user->load('doctor', 'patient');
 
-        return UserResource::make($user)->response()->setStatusCode(201);
+        return response()->json(
+            UserResource::make($user),
+            201,
+        );
     }
 }

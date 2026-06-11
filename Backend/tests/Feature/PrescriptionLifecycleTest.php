@@ -36,23 +36,21 @@ test('doctor can create prescription with items and receive 201', function () {
 
     $response->assertCreated()
         ->assertJsonStructure([
-            'data' => [
-                'id',
-                'code',
-                'status',
-                'notes',
-                'consumed_at',
-                'doctor' => ['id', 'name'],
-                'patient' => ['id', 'name'],
-                'items' => [
-                    ['id', 'name', 'dosage', 'quantity', 'instructions'],
-                ],
-                'created_at',
+            'id',
+            'code',
+            'status',
+            'notes',
+            'consumed_at',
+            'doctor' => ['id', 'name'],
+            'patient' => ['id', 'name'],
+            'items' => [
+                ['id', 'name', 'dosage', 'quantity', 'instructions'],
             ],
+            'created_at',
         ]);
 
-    expect($response->json('data.status'))->toBe('pending');
-    expect($response->json('data.notes'))->toBe('Tomar con agua');
+    expect($response->json('status'))->toBe('pending');
+    expect($response->json('notes'))->toBe('Tomar con agua');
     expect(Prescription::count())->toBe(1);
     expect(PrescriptionItem::count())->toBe(1);
 });
@@ -83,22 +81,20 @@ test('doctor can view own prescription detail', function () {
 
     $response->assertSuccessful()
         ->assertJsonStructure([
-            'data' => [
-                'id',
-                'code',
-                'status',
-                'notes',
-                'doctor' => ['id', 'name'],
-                'patient' => ['id', 'name'],
-                'items' => [
-                    ['id', 'name', 'dosage', 'quantity', 'instructions'],
-                ],
-                'created_at',
+            'id',
+            'code',
+            'status',
+            'notes',
+            'doctor' => ['id', 'name'],
+            'patient' => ['id', 'name'],
+            'items' => [
+                ['id', 'name', 'dosage', 'quantity', 'instructions'],
             ],
+            'created_at',
         ]);
 
-    expect($response->json('data.status'))->toBe('pending');
-    expect($response->json('data.notes'))->toBe('Detalle de prueba');
+    expect($response->json('status'))->toBe('pending');
+    expect($response->json('notes'))->toBe('Detalle de prueba');
 });
 
 test('patient can consume pending prescription', function () {
@@ -119,11 +115,11 @@ test('patient can consume pending prescription', function () {
 
     $response->assertSuccessful()
         ->assertJsonStructure([
-            'data' => ['consumed_at'],
+            'consumed_at',
         ]);
 
-    expect($response->json('data.status'))->toBe('consumed');
-    expect($response->json('data.consumed_at'))->not->toBeNull();
+    expect($response->json('status'))->toBe('consumed');
+    expect($response->json('consumed_at'))->not->toBeNull();
 
     $prescription->refresh();
     expect($prescription->status)->toBe('consumed');

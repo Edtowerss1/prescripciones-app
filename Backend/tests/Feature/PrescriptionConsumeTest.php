@@ -30,11 +30,11 @@ test('patient_consumes_pending_prescription_returns_200', function () {
 
     $response->assertSuccessful()
         ->assertJsonStructure([
-            'data' => ['consumed_at'],
+            'consumed_at',
         ]);
 
-    expect($response->json('data.status'))->toBe('consumed');
-    expect($response->json('data.consumed_at'))->not->toBeNull();
+    expect($response->json('status'))->toBe('consumed');
+    expect($response->json('consumed_at'))->not->toBeNull();
 
     $prescription->refresh();
     expect($prescription->status)->toBe('consumed');

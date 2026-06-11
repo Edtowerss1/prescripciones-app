@@ -126,14 +126,12 @@ test('admin_can_view_any_prescription_detail_returns_200', function () {
 
     $response->assertSuccessful()
         ->assertJsonStructure([
-            'data' => [
-                'id',
-                'code',
-                'status',
-                'doctor' => ['id', 'name'],
-                'patient' => ['id', 'name'],
-                'items',
-                'created_at',
-            ],
+            'id',
+            'code',
+            'status',
+            'doctor' => ['id', 'name'],
+            'patient' => ['id', 'name'],
+            'items',
+            'created_at',
         ]);
 });
