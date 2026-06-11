@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { Chart, ArcElement, Tooltip, Legend } from 'chart.js'
+import { Chart, ArcElement, DoughnutController, Tooltip, Legend } from 'chart.js'
 
-Chart.register(ArcElement, Tooltip, Legend)
+Chart.register(DoughnutController, ArcElement, Tooltip, Legend)
 
 interface Props {
   pending: number
@@ -60,7 +60,9 @@ watch([() => props.pending, () => props.consumed], renderChart)
 </script>
 
 <template>
-  <div class="flex items-center justify-center">
-    <canvas ref="canvasRef" />
+  <div class="flex min-h-64 items-center justify-center">
+    <div class="w-full max-w-56">
+      <canvas ref="canvasRef" />
+    </div>
   </div>
 </template>

@@ -23,6 +23,6 @@ class AdminMetricController extends Controller
             $validated['to'] ?? null,
         );
 
-        return (new AdminMetricResource((object) $metrics))->response();
+        return response()->json(new AdminMetricResource((object) $metrics));
     }
 }

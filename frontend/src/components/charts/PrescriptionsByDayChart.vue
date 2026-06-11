@@ -2,6 +2,7 @@
 import { ref, watch, onMounted } from 'vue'
 import {
   Chart,
+  BarController,
   CategoryScale,
   LinearScale,
   BarElement,
@@ -13,6 +14,7 @@ import {
 } from 'chart.js'
 
 Chart.register(
+  BarController,
   CategoryScale,
   LinearScale,
   BarElement,
@@ -74,7 +76,7 @@ function renderChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: { enabled: hasData },
@@ -96,7 +98,7 @@ watch(() => props.data, renderChart, { deep: true })
 </script>
 
 <template>
-  <div class="flex items-center justify-center">
+  <div class="flex min-h-64 items-center justify-center">
     <canvas ref="canvasRef" />
   </div>
 </template>

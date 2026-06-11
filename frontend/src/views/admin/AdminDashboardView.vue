@@ -33,7 +33,7 @@ function handleRetry() {
 }
 
 function totalsEmpty(): boolean {
-  if (!store.metrics) return true
+  if (!store.metrics?.totals) return true
   const t = store.metrics.totals
   return t.doctors === 0 && t.patients === 0 && t.prescriptions === 0
 }
@@ -100,7 +100,7 @@ onMounted(loadMetrics)
             Total Doctors
           </p>
           <p class="mt-2 text-3xl font-bold text-indigo-600">
-            {{ store.metrics.totals.doctors }}
+            {{ store.metrics?.totals?.doctors ?? 0 }}
           </p>
         </div>
         <div
@@ -111,7 +111,7 @@ onMounted(loadMetrics)
             Total Patients
           </p>
           <p class="mt-2 text-3xl font-bold text-emerald-600">
-            {{ store.metrics.totals.patients }}
+            {{ store.metrics?.totals?.patients ?? 0 }}
           </p>
         </div>
         <div
@@ -122,7 +122,7 @@ onMounted(loadMetrics)
             Total Prescriptions
           </p>
           <p class="mt-2 text-3xl font-bold text-amber-600">
-            {{ store.metrics.totals.prescriptions }}
+            {{ store.metrics?.totals?.prescriptions ?? 0 }}
           </p>
         </div>
       </div>

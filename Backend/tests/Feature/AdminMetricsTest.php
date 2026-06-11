@@ -37,15 +37,13 @@ test('admin gets full metrics with correct JSON structure', function () {
 
     $response->assertSuccessful()
         ->assertJsonStructure([
-            'data' => [
-                'totals' => ['doctors', 'patients', 'prescriptions'],
-                'by_status' => ['pending', 'consumed'],
-                'by_day',
-                'top_doctors',
-            ],
+            'totals' => ['doctors', 'patients', 'prescriptions'],
+            'by_status' => ['pending', 'consumed'],
+            'by_day',
+            'top_doctors',
         ]);
 
-    $data = $response->json('data');
+    $data = $response->json();
     expect($data['totals']['doctors'])->toBe(1);
     expect($data['totals']['patients'])->toBe(1);
     expect($data['totals']['prescriptions'])->toBe(5);
@@ -89,7 +87,7 @@ test('date range filters prescription metrics but not global totals', function (
         ->getJson('/api/admin/metrics?from=2026-05-01&to=2026-05-31');
 
     $response->assertSuccessful();
-    $data = $response->json('data');
+    $data = $response->json();
 
     // Global totals unaffected
     expect($data['totals']['doctors'])->toBe(1);
@@ -110,7 +108,7 @@ test('empty data returns safe zeros', function () {
     $response = $this->withToken($token)->getJson('/api/admin/metrics');
 
     $response->assertSuccessful();
-    $data = $response->json('data');
+    $data = $response->json();
 
     expect($data['totals']['doctors'])->toBe(0);
     expect($data['totals']['patients'])->toBe(0);
