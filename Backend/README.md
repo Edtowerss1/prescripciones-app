@@ -18,7 +18,7 @@ El médico crea prescripciones con ítems manuales, el paciente las consulta, ma
 | Validación | Form Requests |
 | Serialización | API Resources |
 | PDF | barryvdh/laravel-dompdf |
-| Testing | Pest 4 (162 tests, 719 assertions) |
+| Testing | Pest 4 (verified 2026-06-11) |
 | Formateo | Laravel Pint |
 
 ---
@@ -228,32 +228,7 @@ php artisan test --compact --filter=PrescriptionLifecycleTest
 php artisan test --compact --parallel
 ```
 
-**Cobertura**: 162 tests, 719 assertions en ~3 segundos.
-
-| Suite | Tests | Qué cubre |
-|-------|-------|-----------|
-| `ApiTest` | Login/profile/logout básico |
-| `RbacAuthTest` | RBAC por rol, endpoints protegidos |
-| `PrescriptionLifecycleTest` | CRUD de prescripciones, ciclo completo |
-| `PrescriptionConsumeTest` | Transición pending→consumed, 409 en ya consumida |
-| `PrescriptionValidationTest` | Validaciones de Form Request |
-| `PrescriptionAuthorizationTest` | Acceso por ownership y rol |
-| `PrescriptionPdfTest` | Generación de PDF |
-| `PrescriptionListTest` | Listados con filtros y paginación |
-| `PrescriptionPolicyTest` | Unit tests de políticas |
-| `PatientSearchTest` | Búsqueda de pacientes |
-| `PatientPolicyTest` | Unit tests de PatientPolicy |
-| `PatientPrescriptionListTest` | Listado de paciente |
-| `AdminMetricsTest` | Dashboard de métricas |
-| `AdminPrescriptionListTest` | Listado global admin |
-| `UserManagementTest` | CRUD de usuarios admin |
-| `DoctorListTest` | Listado de doctores |
-| `OrderParameterTest` | Parámetro order asc/desc |
-| `RateLimitingTest` | Rate limiting |
-| `CorsTest` | Cabeceras CORS |
-| `SeederDataTest` | Validación de datos de seed |
-| `ModelsSchemaTest` | Schema y relaciones |
-| `ModelsFactoryTest` | Factories de modelos |
+**Verification**: Run `php artisan test --compact` from the project root. All tests MUST pass. The suite exercises auth, RBAC, prescription lifecycle, PDF generation, pagination/filtering, rate limiting, CORS, and data integrity.
 
 ---
 

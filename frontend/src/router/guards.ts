@@ -1,4 +1,5 @@
 import type { Router } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.store'
 
 const roleHomeMap: Record<string, string> = {
   admin: '/admin',
@@ -14,7 +15,6 @@ export function setupAuthGuard(router: Router): void {
     if (!requiresAuth) {
       // Public route — if authenticated and on login, redirect to role home
       if (token && to.name === 'login') {
-        const { useAuthStore } = await import('@/stores/auth.store')
         const store = useAuthStore()
         if (!store.user) {
           await store.fetchProfile()
@@ -30,7 +30,6 @@ export function setupAuthGuard(router: Router): void {
     }
 
     // Has token — ensure profile is loaded
-    const { useAuthStore } = await import('@/stores/auth.store')
     const store = useAuthStore()
 
     if (!store.user) {
