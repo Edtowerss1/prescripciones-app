@@ -6,6 +6,7 @@ import BaseTable from '@/components/ui/BaseTable.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import PrescriptionStatusBadge from '@/components/prescriptions/PrescriptionStatusBadge.vue'
 import { usePrescriptionsStore } from '@/stores/prescriptions.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { useToast } from '@/composables/useToast'
 
 const route = useRoute()
@@ -47,8 +48,10 @@ async function handleDownloadPdf() {
   }
 }
 
+const auth = useAuthStore()
+
 function goBack() {
-  router.push('/doctor/prescriptions')
+  router.push(auth.isAdmin ? '/admin/prescriptions' : '/doctor/prescriptions')
 }
 
 onMounted(() => {
